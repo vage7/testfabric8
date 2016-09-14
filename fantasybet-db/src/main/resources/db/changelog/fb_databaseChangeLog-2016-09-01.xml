@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+	<changeSet author="psiatos" id="109" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add operator to users</comment>
+		<addColumn tableName="users">
+			<column name="operator" type="ENUM('B4TB')" defaultValue="B4TB"><constraints nullable="false"/></column>
+		</addColumn>
+	</changeSet>
+	<changeSet author="psiatos" id="110" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add operator to bet placements</comment>
+		<addColumn tableName="b_placements">
+			<column name="operator" type="ENUM('B4TB')" defaultValue="B4TB"><constraints nullable="false"/></column>
+		</addColumn>
+	</changeSet>
+	<changeSet author="psiatos" id="111" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add payment status/date/transaction id to bet placements</comment>
+		<addColumn tableName="b_placements">
+			<column name="payment_status" type="ENUM('PENDING','FAILURE','SUCCESS')"><constraints nullable="true"/></column>
+			<column name="payment_date" type="DATETIME NULL" defaultValue="NULL"><constraints nullable="true"/></column>
+			<column name="payment_transaction_id" type="varchar(255)"><constraints nullable="true"/></column>
+		</addColumn>
+	</changeSet>
+	<changeSet author="psiatos" id="112" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false" >
+	 	<comment> Add User table Discriminator Column </comment>
+	 	<addColumn tableName="users">
+       	 	<column name="user_type" type="varchar(45)" defaultValue="b4tb"><constraints nullable="false"/></column>
+        </addColumn>
+	</changeSet>
+	<changeSet author="psiatos" id="113" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="true" >
+		<comment>Create B4tbUser table</comment>
+		<createTable tableName="users_b4tb">
+            <column name="b4tb_user_id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="username" type="varchar(128)"><constraints unique="true" nullable="false"/></column>
+            <column name="password" type="varchar(255)"><constraints nullable="false"/></column>
+            <column name="name" type="varchar(512)"/>
+            <column name="surname" type="varchar(512)"/>
+            <column name="email" type="varchar(512)"><constraints unique="false" nullable="false"/></column>
+            <column name="avatar" type="char(32)"/>
+            <column name="timezone" type="VARCHAR(128)"/>
+            <column name="date_activated" type="DATETIME NULL" defaultValue="NULL"/>
+            <column name="birthday" type="DATETIME NULL" defaultValue="NULL"></column>
+            <column name="fullname_dob_hash" type="int"><constraints nullable="false" unique="false"/></column>
+            <column name="fullname_address_hash" type="int"><constraints nullable="false" unique="false"/></column>
+            <column name="fullname_phone_hash" type="int"><constraints nullable="false" unique="false"/></column>
+           	<column name="tracking_id" type="varchar(255)"/>
+        </createTable>
+        <addForeignKeyConstraint constraintName="fk_users_b4tb_id" baseColumnNames="b4tb_user_id" baseTableName="users_b4tb" referencedColumnNames="id" referencedTableName="users"/>
+        <sql>
+	        INSERT INTO users_b4tb (b4tb_user_id, username, password, name, surname, email, avatar, timezone, date_activated, birthday, fullname_dob_hash, fullname_address_hash, fullname_phone_hash, tracking_id)
+			SELECT id, username, password, name, surname, email, avatar, timezone, date_activated, birthday, fullname_dob_hash, fullname_address_hash, fullname_phone_hash, tracking_id
+			FROM users;
+        </sql>
+        <rollback>
+       		<dropTable tableName="users_b4tb"/>
+        </rollback>
+	</changeSet>
+	<changeSet author="psiatos" id="114" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add B4tbUser email index</comment>
+		<createIndex tableName="users_b4tb" indexName="users_b4tb_idx1"><column name="email"/></createIndex>
+	</changeSet>
+	<changeSet author="psiatos" id="115" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Drop the new B4tbUser columns from "users" table</comment>
+		<dropColumn tableName="users" columnName="username"/>
+		<dropColumn tableName="users" columnName="password"/>
+		<dropColumn tableName="users" columnName="name"/>
+		<dropColumn tableName="users" columnName="surname"/>
+		<dropColumn tableName="users" columnName="email"/>
+		<dropColumn tableName="users" columnName="avatar"/>
+		<dropColumn tableName="users" columnName="timezone"/>
+		<dropColumn tableName="users" columnName="date_activated"/>
+		<dropColumn tableName="users" columnName="birthday"/>
+		<dropColumn tableName="users" columnName="fullname_dob_hash"/>
+		<dropColumn tableName="users" columnName="fullname_address_hash"/>
+		<dropColumn tableName="users" columnName="fullname_phone_hash"/>
+		<dropColumn tableName="users" columnName="tracking_id"/>
+	</changeSet>
+	<changeSet author="psiatos" id="116" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add User external id</comment>
+		<addColumn tableName="users">
+			<column name="external_id" type="varchar(255)"/>
+		</addColumn>
+	</changeSet>
+	<changeSet author="psiatos" id="117" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Alter BetTransaction, set wallet id as nullable</comment>
+		<dropNotNullConstraint columnDataType="binary(16)" tableName="b_transactions" columnName="wallet_id"/>
+	</changeSet>
+	<changeSet author="psiatos" id="118" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add BetTransaction wallet type and external id</comment>
+		<addColumn tableName="b_transactions">
+			<column name="wallet_type" type="ENUM('LOCAL','REMOTE')" defaultValue="LOCAL"><constraints nullable="false"/></column>
+			<column name="external_id" type="varchar(255)" ></column>
+		</addColumn>
+	</changeSet>
+	<changeSet author="psiatos" id="119" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add BetPlacement operatorToken</comment>
+		<addColumn tableName="b_placements">
+			<column name="operator_token" type="varchar(255)" ></column>
+		</addColumn>
+	</changeSet>
+	<changeSet author="psiatos" id="120" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add operator to bet configurations</comment>
+		<addColumn tableName="b_challenge_conf">
+			<column name="operator"  type="ENUM('B4TB')" defaultValue="B4TB" ></column>
+		</addColumn>
+		<addColumn tableName="b_fantasy_derby_conf">
+			<column name="operator"  type="ENUM('B4TB')" defaultValue="B4TB" ></column>
+		</addColumn>
+		<addColumn tableName="b_mvp_conf">
+			<column name="operator"  type="ENUM('B4TB')" defaultValue="B4TB" ></column>
+		</addColumn>
+		<addColumn tableName="b_regular_match_conf">
+			<column name="operator"  type="ENUM('B4TB')" defaultValue="B4TB" ></column>
+		</addColumn>
+		<addColumn tableName="b_tournament_conf">
+			<column name="operator"  type="ENUM('B4TB')" defaultValue="B4TB" ></column>
+		</addColumn>
+		<addColumn tableName="b_tournament_pvp_conf">
+			<column name="operator"  type="ENUM('B4TB')" defaultValue="B4TB" ></column>
+		</addColumn>
+	</changeSet>
+	<changeSet author="psiatos" id="121" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add operator 'TEST' to all tables.</comment>
+		<sql>
+			ALTER TABLE `users` CHANGE COLUMN `operator` `operator` ENUM('B4TB', 'TEST') CHARACTER SET 'utf8' NOT NULL;
+			ALTER TABLE `b_placements` CHANGE COLUMN `operator` `operator` ENUM('B4TB', 'TEST') CHARACTER SET 'utf8' NOT NULL;
+			ALTER TABLE `b_fantasy_derby_conf` CHANGE COLUMN `operator` `operator` ENUM('B4TB', 'TEST') CHARACTER SET 'utf8' NOT NULL;
+			ALTER TABLE `b_mvp_conf` CHANGE COLUMN `operator` `operator` ENUM('B4TB', 'TEST') CHARACTER SET 'utf8' NOT NULL;
+			ALTER TABLE `b_regular_match_conf` CHANGE COLUMN `operator` `operator` ENUM('B4TB', 'TEST') CHARACTER SET 'utf8' NOT NULL;
+			ALTER TABLE `b_tournament_conf` CHANGE COLUMN `operator` `operator` ENUM('B4TB', 'TEST') CHARACTER SET 'utf8' NOT NULL;
+			ALTER TABLE `b_tournament_pvp_conf` CHANGE COLUMN `operator` `operator` ENUM('B4TB', 'TEST') CHARACTER SET 'utf8' NOT NULL;
+			ALTER TABLE `b_challenge_conf` CHANGE COLUMN `operator` `operator` ENUM('B4TB', 'TEST') CHARACTER SET 'utf8' NOT NULL;
+		</sql>
+	</changeSet>
+	<changeSet author="psiatos" id="122" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Modify user nickname unique index to nickname/operator unique index</comment>
+		<dropIndex tableName="users" indexName="nickname"/>
+		<createIndex tableName="users" indexName="operator_nickname" unique="true">
+			<column name="operator"></column>
+			<column name="nickname"></column>
+		</createIndex>
+	</changeSet>
+		<changeSet author="psiatos" id="123" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Modify regular match conf - match_id unique index to match_id/operator unique index</comment>
+		<dropIndex tableName="b_regular_match_conf" indexName="match_id"/>
+		<createIndex tableName="b_regular_match_conf" indexName="match_id_operator" unique="true">
+			<column name="operator"></column>
+			<column name="match_id"></column>
+		</createIndex>
+	</changeSet>
+		<changeSet author="psiatos" id="124" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add table b_guarantee_rule</comment>
+        <createTable tableName="b_guarantee_rule">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="bet_configuration_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="amount" type="DECIMAL(15,2) UNSIGNED"/>
+            <column name="from_match_week_id" type="binary(16)"/>
+            <column name="to_match_week_id" type="binary(16)"/>
+        </createTable>
+	</changeSet>
+
+    <changeSet author="m.papantonakos" id="125" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>Create backoffice domain tables</comment>
+        <createTable tableName="users_bo">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="username" type="varchar(128)"><constraints unique="true" nullable="false"/></column>
+            <column name="password" type="varchar(255)"><constraints nullable="false"/></column>
+            <column name="status" type="varchar(255)"><constraints nullable="false"/></column>
+        </createTable>
+        <createTable tableName="users_bo_roles">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="user_role" type="varchar(255)"><constraints nullable="false"/></column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="users_bo_roles"
+                                 baseColumnNames="user_id"
+                                 constraintName="FK_users_bo_roles_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedTableName="users_bo"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet author="m.papantonakos" id="126" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>Create init data for backoffice backoffice</comment>
+        <sql>
+            INSERT INTO `users_bo`(`id`,`username`,`password`,`status`) VALUES (unhex('0A0C2940B11B11E4AA011050568C0ACC'), 'bo', '$2a$10$M.aNIGFK/VsZ5w0VQsbD2e48z1VYk6geigF9f58v1beiUH9O3uK2W', 'ACTIVE');
+            INSERT INTO `users_bo_roles`(`id`,`user_id`,`user_role`) VALUES (unhex(REPLACE(UUID(), '-', '')), unhex('0A0C2940B11B11E4AA011050568C0ACC'), 'BACKOFFICE');
+        </sql>
+    </changeSet>
+    
+   	<changeSet author="psiatos" id="127" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add BetPotStat topupAmount</comment>
+		<addColumn tableName="b_pot_stats">
+			<column name="topup_amount" type="DECIMAL(15,2) UNSIGNED" defaultValue="0.00"/>
+		</addColumn>
+	</changeSet>
+   	
+   	<changeSet author="psiatos" id="128" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add startMatchWeek, endMatchWeek in configuration tables</comment>
+		<addColumn tableName="b_challenge_conf">
+			<column name="start_match_week_id"  type="binary(16)"></column>
+			<column name="end_match_week_id"  type="binary(16)"></column>
+		</addColumn>
+		<addColumn tableName="b_fantasy_derby_conf">
+			<column name="start_match_week_id"  type="binary(16)"></column>
+			<column name="end_match_week_id"  type="binary(16)"></column>
+		</addColumn>
+		<addColumn tableName="b_mvp_conf">
+			<column name="start_match_week_id"  type="binary(16)"></column>
+			<column name="end_match_week_id"  type="binary(16)"></column>
+		</addColumn>
+		<addColumn tableName="b_regular_match_conf">
+			<column name="start_match_week_id"  type="binary(16)"></column>
+			<column name="end_match_week_id"  type="binary(16)"></column>
+		</addColumn>
+		<addColumn tableName="b_tournament_conf">
+			<column name="start_match_week_id"  type="binary(16)"></column>
+			<column name="end_match_week_id"  type="binary(16)"></column>
+		</addColumn>
+		<addColumn tableName="b_tournament_pvp_conf">
+			<column name="start_match_week_id"  type="binary(16)"></column>
+			<column name="end_match_week_id"  type="binary(16)"></column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet author="psiatos" id="129" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="true">
+		<comment>Migrate configuration dates to matchweeks</comment>
+		<sql>
+			UPDATE b_regular_match_conf c 
+				JOIN match_games mg ON mg.id = c.match_id
+				JOIN match_weeks mw ON mw.id = mg.match_week_id
+			SET c.start_match_week_id = mw.id, c.end_match_week_id = mw.id;
+			UPDATE b_tournament_conf c
+				JOIN match_weeks mw ON mw.start_date = c.start_date
+			SET c.start_match_week_id = mw.id, c.end_match_week_id = mw.id
+			WHERE c.start_date IS NOT NULL;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="psiatos" id="130" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Remove startDate, endDate from configuration tables</comment>
+		<dropColumn tableName="b_challenge_conf" columnName="start_date"></dropColumn>
+		<dropColumn tableName="b_challenge_conf" columnName="end_date"></dropColumn>
+		<dropColumn tableName="b_fantasy_derby_conf" columnName="start_date"></dropColumn>
+		<dropColumn tableName="b_fantasy_derby_conf" columnName="end_date"></dropColumn>
+		<dropColumn tableName="b_mvp_conf" columnName="start_date"></dropColumn>
+		<dropColumn tableName="b_mvp_conf" columnName="end_date"></dropColumn>
+		<dropColumn tableName="b_regular_match_conf" columnName="start_date"></dropColumn>
+		<dropColumn tableName="b_regular_match_conf" columnName="end_date"></dropColumn>
+		<dropColumn tableName="b_tournament_conf" columnName="start_date"></dropColumn>
+		<dropColumn tableName="b_tournament_conf" columnName="end_date"></dropColumn>
+		<dropColumn tableName="b_tournament_pvp_conf" columnName="start_date"></dropColumn>
+		<dropColumn tableName="b_tournament_pvp_conf" columnName="end_date"></dropColumn>
+	</changeSet>
+	
+  	<changeSet author="psiatos" id="131" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add OptaFileProcessingLog - processedFileName</comment>
+		<addColumn tableName="opta_file_processing_log">
+			<column name="processed_file_name"  type="char(128)"></column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet author="psiatos" id="132" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add table to record errors when processing received opta files</comment>
+        <createTable tableName="opta_file_processing_error">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="file_name" type="char(128)"><constraints nullable="false"/></column>
+           	<column name="processed_file_name"  type="char(128)"></column>
+            <column name="match_id" type="binary(16)"><constraints nullable="true"/></column>
+            <column name="league_id" type="binary(16)"><constraints nullable="true"/></column>
+            <column name="error_type" 
+            	type="ENUM('GENERIC','ATHLETE_NOT_FOUND','TEAM_NOT_FOUND','MATCH_NOT_FOUND','LEAGUE_NOT_FOUND','SEASON_NOT_FOUND','INVALID_NO_OF_STATS')">
+				<constraints nullable="false"/>
+			</column>
+			<column name="metadata" type="BLOB"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="m.papantonakos" id="133" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>Create index for opta_file_processing_log using match_id and status</comment>
+        <createIndex indexName="opta_file_processing_log_idx1" tableName="opta_file_processing_log">
+            <column name="match_id" />
+            <column name="match_status"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="m.papantonakos" id="134" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add is_read column</comment>
+        <addColumn tableName="opta_file_processing_error"><column name="is_read" type="bit(1)" defaultValueBoolean="true"><constraints nullable="false"/></column></addColumn>
+    </changeSet>
+    
+    <changeSet author="psiatos" id="135" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add table to record errors when doing a transaction through vermantia api</comment>
+        <createTable tableName="vermantia_transaction_errors">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="bet_placement_id" type="binary(16)"/>
+			<column name="error_date" type="DATE"/>
+			<column name="request" type="BLOB"/>
+			<column name="response" type="BLOB"/>
+        </createTable>
+    </changeSet>
+    
+	<changeSet author="psiatos" id="136" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="true">
+		<comment>Set "EN_PR", "ES_PL", "IT_SA" tournament/mvp/fantasy derby conf start/end match weeks</comment>
+		<sql>
+			# Tournaments
+			UPDATE b_tournament_conf btc
+			SET start_match_week_id = (SELECT id from match_weeks 
+										where season_id = (SELECT id from seasons where league_id = btc.league_id order by start_date desc limit 1)
+										order by start_date asc limit 1)
+			, end_match_week_id = (SELECT id from match_weeks 
+										where season_id = (SELECT id from seasons where league_id = btc.league_id order by start_date desc limit 1)
+										order by end_date desc limit 1)
+			WHERE type = "SYSTEM" 
+			and league_id IN (Select id from leagues where league_code IN ("EN_PR", "IT_SA", "ES_PL"))
+			and active = 1
+			and start_match_week_id is null;
+			
+			# MVP
+			UPDATE b_mvp_conf btc
+			SET start_match_week_id = (SELECT id from match_weeks 
+										where season_id = (SELECT id from seasons where league_id = btc.league_id order by start_date desc limit 1)
+										order by start_date asc limit 1)
+			, end_match_week_id = (SELECT id from match_weeks 
+										where season_id = (SELECT id from seasons where league_id = btc.league_id order by start_date desc limit 1)
+										order by end_date desc limit 1)
+			WHERE league_id IN (Select id from leagues where league_code IN ("EN_PR", "IT_SA", "ES_PL"))
+			and active = 1
+			and start_match_week_id is null;
+			
+			# Fantasy Derbies
+			UPDATE b_fantasy_derby_conf btc
+			SET start_match_week_id = (SELECT id from match_weeks 
+										where season_id = (SELECT id from seasons where league_id = btc.league_id order by start_date desc limit 1)
+										order by start_date asc limit 1)
+			, end_match_week_id = (SELECT id from match_weeks 
+										where season_id = (SELECT id from seasons where league_id = btc.league_id order by start_date desc limit 1)
+										order by end_date desc limit 1)
+			WHERE league_id IN (Select id from leagues where league_code IN ("EN_PR", "IT_SA", "ES_PL"))
+			and active = 1
+			and start_match_week_id is null;
+		</sql>
+		
+	</changeSet>
+	
+	<changeSet author="psiatos" id="137" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="true">
+		<comment>Set challenge bet configurations conf start/end match weeks</comment>
+		<sql>
+			UPDATE b_challenge_conf btc
+			SET start_match_week_id = (SELECT id from match_weeks 
+										where season_id = (SELECT id from seasons where league_id = btc.league_id order by start_date desc limit 1)
+										order by start_date asc limit 1)
+			, end_match_week_id = (SELECT id from match_weeks 
+										where season_id = (SELECT id from seasons where league_id = btc.league_id order by start_date desc limit 1)
+										order by end_date desc limit 1);
+		</sql>
+	</changeSet>
+	
+	<changeSet author="psiatos" id="138" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="true">
+		<comment>Duplicate all payout schemes for custom tournaments. </comment>
+		<sql>
+			INSERT INTO b_tournament_payout_scheme
+			(id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage)
+			SELECT unhex(REPLACE(UUID(), '-', '')), unhex('AAA21303326F11E3B3AC0024BED64796'), min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage
+			FROM b_tournament_payout_scheme;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="psiatos" id="139" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="true">
+		<comment>Add CustomTournament - Payout scheme for 2 players</comment>
+		<sql>
+			INSERT INTO b_tournament_payout_scheme
+			(id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage)
+			VALUES
+			(unhex(REPLACE(UUID(), '-', '')), unhex('AAA21303326F11E3B3AC0024BED64796'), 1, 1, 2, 2, 1.0000);
+		</sql>
+	</changeSet>
+	
+	<changeSet author="psiatos" id="140" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="true">
+		<comment>Update all custom tournaments confs, set new payout_scheme_id</comment>
+		<sql>
+			UPDATE b_tournament_conf
+			SET payout_scheme_id = unhex('AAA21303326F11E3B3AC0024BED64796')
+			WHERE type = "CUSTOM";
+		</sql>
+	</changeSet>
+	
+	<changeSet author="psiatos" id="141" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="true">
+		<comment>Create payout scheme table</comment>
+		   <createTable tableName="b_payout_scheme">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="name" type="varchar(25)"/>
+        </createTable>
+	</changeSet>
+	
+	<changeSet author="psiatos" id="142" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="true">
+		<comment>Insert payout schemes</comment>
+		<sql>
+			INSERT INTO b_payout_scheme
+			(id, name)
+			VALUES
+			(unhex('FDC21303326F11E3B3AC0024BED64796'), 'system'),
+			 (unhex('AAA21303326F11E3B3AC0024BED64796'), 'custom')
+		</sql>
+	</changeSet>
+		
+</databaseChangeLog>

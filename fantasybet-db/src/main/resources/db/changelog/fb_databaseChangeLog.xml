@@ -1,0 +1,1878 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="apsegian" id="1" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>Create sport domain tables</comment>
+
+        <createTable tableName="users">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="username" type="varchar(128)"><constraints unique="true" nullable="false"/></column>
+            <column name="password" type="varchar(255)"><constraints nullable="false"/></column>
+            <column name="name" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="surname" type="varchar(512)"/>
+            <column name="email" type="varchar(512)"><constraints unique="false" nullable="false"/></column>
+            <column name="avatar" type="char(32)"/>
+            <column name="timezone" type="VARCHAR(128)"><constraints nullable="false"/></column>
+            <column name="email_verified" type="bit(1)"/>
+            <column name="status" type="ENUM('NEW','ACTIVE','SELF_BANNED','LOCKED','EXPIRED','DELETED','SYSTEM')"><constraints nullable="false"/></column>
+            <column name="date_created" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="date_activated" type="TIMESTAMP NULL" defaultValue="NULL"/>
+            <column name="birthday" type="TIMESTAMP NULL" defaultValue="NULL"></column>
+            <column name="forgot_key" type="varchar(32)"/>
+            <column name="forgot_key_date" type="TIMESTAMP NULL" defaultValue="NULL"></column>
+            <column name="email_verification_key" type="varchar(32)"/>
+            <column name="agreed_terms_version" type="varchar(50)"><constraints nullable="false"/></column>
+            <column name="agreed_terms_date" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="security_question" type="varchar(100)"><constraints nullable="false"/></column>
+            <column name="security_question_answer" type="varchar(255)"><constraints nullable="false"/></column>
+            <column name="security_question_correct" type="bit(1)"><constraints nullable="false"/></column>
+            <column name="self_banned_date" type="TIMESTAMP NULL" defaultValue="NULL"></column>
+            <column name="reality_check_enabled" type="bit(1)"><constraints nullable="false"/></column>
+            <column name="client_verified" type="bit(1)"><constraints nullable="false"/></column>
+        </createTable>
+        <sql>INSERT INTO users (name, email, id, username, date_created, status, date_activated, password, timezone, agreed_terms_version, agreed_terms_date, security_question, security_question_answer, security_question_correct, reality_check_enabled, client_verified)
+            VALUES ('system', 'info@keevosh.com', X'41ecd948b0fb11e2b453001e3378d786', 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'password', 'Europe/Athens', '0.1', CURRENT_TIMESTAMP, 'security_question', 'security_question_answer', 0, 0, 0)
+        </sql>
+
+        <createTable tableName="user_limits">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="limit_type" type="ENUM('MAX_BET_AMOUNT', 'MAX_DAILY_LOSE_AMOUNT', 'MAX_WEEKLY_LOSE_AMOUNT', 'MAX_MONTHLY_LOSE_AMOUNT', 'MAX_DAILY_WAGER_AMOUNT', 'MAX_WEEKLY_WAGER_AMOUNT', 'MAX_MONTHLY_WAGER_AMOUNT', 'MAX_TIME_PER_SESSION')"><constraints nullable="false"/></column>
+            <column name="version" type="mediumint(5)"><constraints nullable="false"/></column>
+            <column name="amount" type="DECIMAL(15,2) UNSIGNED"/>
+            <column name="new_amount" type="DECIMAL(15,2) UNSIGNED"/>
+            <column name="value" type="int(5) UNSIGNED"/>
+            <column name="new_value" type="int(5) UNSIGNED"/>
+            <column name="date_updated" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="effective_date" type="TIMESTAMP NULL" defaultValue="NULL"></column>
+        </createTable>
+
+        <createTable tableName="user_wallets">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="amount" type="DECIMAL(15,2) UNSIGNED"/>
+            <column name="card_details" type="varchar(500)"><constraints nullable="true"/></column>
+            <column name="date_updated" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+        </createTable>
+
+
+        <createTable tableName="user_wallet_entries">
+            <column name="wallet_id" type="binary(16)"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="type" type="ENUM('INTERNAL','EXTERNAL')"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="entry_id" type="varchar(50)"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="amount" type="DECIMAL(15,2)"><constraints nullable="false"/></column>
+            <column name="date_updated" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="user_addresses">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="full_name" type="varchar(128)"><constraints nullable="false"/></column>
+            <column name="address_unit_number" type="varchar(25)"/>
+            <column name="street_name" type="varchar(128)"><constraints nullable="false"/></column>
+            <column name="street_number" type="varchar(25)"><constraints nullable="false"/></column>
+            <column name="city_name" type="varchar(128)"><constraints nullable="false"/></column>
+            <column name="postal_code" type="varchar(25)"><constraints nullable="false"/></column>
+            <column name="territory_code" type="varchar(25)"/>
+            <column name="country_code" type="varchar(25)"><constraints nullable="false"/></column>
+            <column name="fax" type="varchar(25)"/>
+            <column name="phone" type="varchar(25)"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="user_audit_logs">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="date_created" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="type" type="ENUM('REGISTER','LOGIN_SUCCESS','LOGIN_FAIL','PASS_FORGOT','PASS_RESET','ACCOUNT_BAN','ACCOUNT_CLOSE','ACCOUNT_LOCK')"><constraints nullable="false"/></column>
+            <column name="ip" type="varchar(50)"></column>
+            <column name="reason" type="varchar(255)"></column>
+        </createTable>
+        <createIndex indexName="user_audit_logs_idx1" tableName="user_audit_logs">
+            <column name="user_id"/>
+            <column name="date_created"/>
+        </createIndex>
+
+        <createTable tableName="sports">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="name" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="number_of_players" type="smallint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="default_flag" type="bit(1)"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="leagues">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="sport_id" type="binary(16)"><constraints nullable="false" foreignKeyName="league_sport_fk" references="sports(id)"/></column>
+            <column name="country_code" type="char(3)"><constraints nullable="false"/></column>
+            <column name="name" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="default_flag" type="bit(1)"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="seasons">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="sport_id" type="binary(16)"><constraints nullable="false" foreignKeyName="season_sport_fk" references="sports(id)"/></column>
+            <column name="league_id" type="binary(16)"><constraints nullable="false" foreignKeyName="season_league_fk" references="leagues(id)"/></column>
+            <column name="name" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="start_date" type="DATE"><constraints nullable="false"/></column>
+            <column name="end_date" type="DATE"><constraints nullable="false"/></column>
+        </createTable>
+        <createIndex indexName="seasons_league_id_idx" tableName="seasons">
+            <column name="league_id"/>
+        </createIndex>
+
+        <createTable tableName="match_weeks">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="name" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="season_id" type="binary(16)"><constraints nullable="false" foreignKeyName="matchweek_season_fk" references="seasons(id)"/></column>
+            <column name="start_date" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="end_date" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="teams_locked" type="bit(1)"><constraints nullable="false"/></column>
+            <column name="status" type="ENUM('OPEN', 'CLOSED')"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="match_days">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="name" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="match_week_id" type="binary(16)"><constraints nullable="false" foreignKeyName="matchd_matchw_fk" references="match_weeks(id)"/></column>
+            <column name="start_date" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="end_date" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="number_of_matches" type="smallint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="status" type="ENUM('OPEN', 'CLOSED')"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="teams">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="external_id" type="char(32)"><constraints nullable="false"/></column>
+            <column name="sport_id" type="binary(16)"><constraints nullable="false" foreignKeyName="team_sport_fk" references="sports(id)"/></column>
+            <column name="name" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="country_code" type="char(3)"><constraints nullable="false"/></column>
+            <column name="year_founded" type="smallint(4) UNSIGNED"></column>
+            <column name="home_town_name" type="varchar(512)"></column>
+            <column name="home_ground_name" type="varchar(512)"></column>
+            <column name="abbr_name" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="shirt_id" type="int(3) UNSIGNED"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="athletes">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="external_id" type="char(32)"><constraints nullable="false"/></column>
+            <column name="name" type="varchar(512)"><constraints nullable="true"/></column>
+            <column name="surname" type="varchar(512)"><constraints nullable="true"/></column>
+            <column name="date_of_birth" type="DATE"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="team_members">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="position" type="ENUM('SOC_GK','SOC_DF','SOC_MF','SOC_FW', 'SOC_UN')"><constraints nullable="false"/></column>
+            <column name="team_id" type="binary(16)"><constraints nullable="false" foreignKeyName="member_team_fk" references="teams(id)"/></column>
+            <column name="season_id" type="binary(16)"><constraints nullable="false" foreignKeyName="member_season_fk" references="seasons(id)"/></column>
+            <column name="athlete_id" type="binary(16)"><constraints nullable="false" foreignKeyName="member_athlete_fk" references="athletes(id)"/></column>
+            <column name="shirt_name" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="shirt_number" type="smallint(3) UNSIGNED"><constraints nullable="true"/></column>
+            <column name="start_date" type="DATE"><constraints nullable="false"/></column>
+            <column name="end_date" type="DATE"><constraints nullable="false"/></column>
+        </createTable>
+        <createIndex indexName="team_members_3x_idx" tableName="team_members">
+            <column name="team_id"/>
+            <column name="season_id"/>
+            <column name="athlete_id"/>
+        </createIndex>
+
+        <createTable tableName="match_games">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="status" type="ENUM('SCHEDULED', 'IN_PROGRESS', 'FINISHED', 'POSTPONED', 'CANCELLED')"><constraints nullable="false"/></column>
+            <column name="match_day_id" type="binary(16)"><constraints nullable="false" foreignKeyName="match_matchd_fk" references="match_days(id)"/></column>
+            <column name="home_team_id" type="binary(16)"><constraints nullable="false" foreignKeyName="match_hteam_fk" references="teams(id)"/></column>
+            <column name="away_team_id" type="binary(16)"><constraints nullable="false" foreignKeyName="match_vteam_fk" references="teams(id)"/></column>
+            <column name="match_date" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="home_goals" type="smallint(2) UNSIGNED" defaultValue="0"/>
+            <column name="away_goals" type="smallint(2) UNSIGNED" defaultValue="0"/>
+        </createTable>
+
+        <createTable tableName="season_members">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="season_id" type="binary(16)"><constraints nullable="false" foreignKeyName="sm_season_fk" references="seasons(id)"/></column>
+            <column name="league_id" type="binary(16)"><constraints nullable="false" foreignKeyName="sm_league_fk" references="leagues(id)"/></column>
+            <column name="team_id" type="binary(16)"><constraints nullable="false" foreignKeyName="sm_team_fk" references="teams(id)"/></column>
+        </createTable>
+        <createIndex indexName="season_members_3x_idx" tableName="season_members">
+            <column name="team_id"/>
+            <column name="league_id"/>
+            <column name="season_id"/>
+        </createIndex>
+
+        <createTable tableName="football_stats">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="match_id" type="binary(16)"><constraints nullable="false" foreignKeyName="fst_match_fk" references="match_games(id)"/></column>
+            <column name="match_day_id" type="binary(16)"><constraints nullable="false" foreignKeyName="fst_matchday_fk" references="match_days(id)"/></column>
+            <column name="team_member_id" type="binary(16)"><constraints nullable="false" foreignKeyName="fst_tmember_fk" references="team_members(id)"/></column>
+            <column name="position" type="ENUM('SOC_GK', 'SOC_DF', 'SOC_MF', 'SOC_FW', 'SOC_UN')"><constraints nullable="false"/></column>
+            <column name="minutes_played" type="tinyint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="goals_scored" type="tinyint(2) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="goal_assists" type="tinyint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="clean_sheet" type="bit(1)"><constraints nullable="false"/></column>
+            <column name="shots_saved" type="tinyint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="penalty_save" type="tinyint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="penalty_miss" type="tinyint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="goals_conceded" type="tinyint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="yellow_cards" type="tinyint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="red_cards" type="tinyint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="own_goals" type="tinyint(2) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="kick_shots" type="tinyint(2) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="shots_off_target" type="tinyint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="fouls_won" type="tinyint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="fouls_committed" type="tinyint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="offside_provoked" type="tinyint(3) UNSIGNED"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="fantasy_leagues">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="type" type="ENUM('PRIVATE', 'SYSTEM')"><constraints nullable="false"/></column>
+            <column name="name" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="season_id" type="binary(16)"><constraints nullable="false" foreignKeyName="fl_season_fk" references="seasons(id)"/></column>
+            <column name="league_id" type="binary(16)"><constraints nullable="false" foreignKeyName="fl_league_fk" references="leagues(id)"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="true" foreignKeyName="fl_user_fk" references="users(id)"/></column>
+            <column name="password" type="varchar(255)"><constraints nullable="true"/></column>
+            <column name="start_week_id" type="binary(16)"><constraints nullable="false" foreignKeyName="fl_matchw_fk" references="match_weeks(id)"/></column>
+            <column name="default_flag" type="bit(1)"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="team_member_scores">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="match_id" type="binary(16)"><constraints nullable="false" foreignKeyName="tms_match_fk" references="match_games(id)"/></column>
+            <column name="match_day_id" type="binary(16)"><constraints nullable="false" foreignKeyName="tms_matchday_fk" references="match_days(id)"/></column>
+            <column name="team_member_id" type="binary(16)"><constraints nullable="false" foreignKeyName="tms_tmember_fk" references="team_members(id)"/></column>
+            <column name="score" type="mediumint(5)"><constraints nullable="false"/></column>
+            <column name="details" type="varchar(1024)"><constraints nullable="false"/></column>
+        </createTable>
+        <createIndex indexName="team_member_scores_tmid_idx" tableName="team_member_scores">
+            <column name="team_member_id"/>
+        </createIndex>
+
+        <createTable tableName="fantasy_teams">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="version" type="mediumint(5)"><constraints nullable="false"/></column>
+            <column name="type" type="ENUM('T11', 'T5', 'T3')"><constraints nullable="false"/></column>
+            <column name="valid" type="bit(1)"><constraints nullable="false"/></column>
+            <column name="scope" type="ENUM('BET', 'FANTASY', 'SYSTEM')"><constraints nullable="true"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="true" foreignKeyName="ft_user_fk" references="users(id)"/></column>
+            <column name="league_id" type="binary(16)"><constraints nullable="false" foreignKeyName="ft_league_fk" references="leagues(id)"/></column>
+            <column name="captain_id" type="binary(16)"><constraints nullable="true" foreignKeyName="ft_c_teammember_fk" references="team_members(id)"/></column>
+            <column name="vice_captain_id" type="binary(16)"><constraints nullable="true" foreignKeyName="ft_vc_teammember_fk" references="team_members(id)"/></column>
+            <column name="formation" type="ENUM('F_3_4_3','F_3_5_2','F_3_6_1','F_4_3_3','F_4_4_2','F_4_5_1','F_5_2_3','F_5_3_2','F_5_4_1','F_6_2_2','F_6_3_1', 'F_1_1_2', 'F_1_2_1', 'F_2_1_1', 'F_1_1_1')"><constraints nullable="true"/></column>
+            <column name="rteam_id" type="binary(16)"><constraints nullable="true"/></column>
+            <column name="name" type="varchar(512)"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="fantasy_team_members">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="fantasy_team_id" type="binary(16)"><constraints nullable="false" foreignKeyName="ftm_fantasyteam_fk" references="fantasy_teams(id)"/></column>
+            <column name="team_member_id" type="binary(16)"><constraints nullable="false" foreignKeyName="ftm_tmember_fk" references="team_members(id)"/></column>
+            <column name="position_index" type="tinyint(2) UNSIGNED"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="fantasy_team_final_members">
+            <column name="match_week_id" type="binary(16)"><constraints primaryKey="true" foreignKeyName="ftfm_matchw_fk" references="match_weeks(id)"/></column>
+            <column name="fantasy_team_id" type="binary(16)"><constraints primaryKey="true" foreignKeyName="ftfm_fantasyteam_fk" references="fantasy_teams(id)"/></column>
+            <column name="team_member_id" type="binary(16)"><constraints primaryKey="true" foreignKeyName="ftfm_tmember_fk" references="team_members(id)"/></column>
+            <column name="position_index" type="tinyint(2) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="date_finalized" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="fantasy_team_member_role" type="ENUM('CAPTAIN', 'VICE_CAPTAIN')"><constraints nullable="true"/></column>
+        </createTable>
+
+        <createTable tableName="fantasy_league_members">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="fantasy_team_id" type="binary(16)"><constraints nullable="false" foreignKeyName="flm_fantasyteam_fk" references="fantasy_teams(id)"/></column>
+            <column name="fantasy_league_id" type="binary(16)"><constraints nullable="false" foreignKeyName="flm_fantasyleague_fk" references="fantasy_leagues(id)"/></column>
+            <column name="status" type="ENUM('PENDING_MEMBER', 'MEMBER')"><constraints nullable="false"/></column>
+            <column name="joined_week_id" type="binary(16)"><constraints nullable="false" foreignKeyName="flm_matchw_fk" references="match_weeks(id)"/></column>
+            <column name="points" type="int(10) UNSIGNED" defaultValue="0"/>
+            <column name="rank" type="smallint(5) UNSIGNED" defaultValue="0"/>
+            <column name="previous_rank" type="smallint(5) UNSIGNED" defaultValue="0"/>
+        </createTable>
+
+        <createTable tableName="fantasy_team_scores">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="fantasy_team_id" type="binary(16)"><constraints nullable="false" foreignKeyName="fts_fantasyteam_fk" references="fantasy_teams(id)"/></column>
+            <column name="match_week_id" type="binary(16)"><constraints nullable="false" foreignKeyName="fts_matchweek_fk" references="match_weeks(id)"/></column>
+            <column name="status" type="ENUM('OPEN', 'FINALIZED', 'POSTPONED')"><constraints nullable="false"/></column>
+            <column name="goals_scored" type="tinyint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="goals_conceded" type="tinyint(3) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="minutes_played" type="smallint(5) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="lost_from_cards" type="mediumint(5)"><constraints nullable="false"/></column>
+            <column name="captain_score" type="mediumint(5)"><constraints nullable="false"/></column>
+            <column name="avg_score" type="mediumint(5)"><constraints nullable="false"/></column>
+            <column name="score" type="mediumint(5)"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="team_member_feeds">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="team_member_id" type="binary(16)"><constraints nullable="false" foreignKeyName="tmf_tmember_fk" references="team_members(id)"/></column>
+            <column name="status" type="ENUM('ACTIVE', 'INACTIVE')"><constraints nullable="false"/></column>
+            <column name="type" type="ENUM('INFO', 'INJ_25', 'INJ_50', 'INJ_75', 'MATCH_MISS')"><constraints nullable="false"/></column>
+            <column name="start_date" type="TIMESTAMP NULL" defaultValue="NULL"></column>
+            <column name="end_date" type="TIMESTAMP NULL" defaultValue="NULL"></column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="apsegian" id="2" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>Create bet domain tables</comment>
+
+        <createTable tableName="b_regular_match_conf">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="active" type="bit(1)"/>
+            <column name="league_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="start_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+            <column name="end_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+            <column name="title" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="description" type="varchar(512)"></column>
+            <column name="match_id" type="binary(16)"><constraints unique="true" nullable="false"/></column>
+            <column name="restricted" type="bit(1)"/>
+        </createTable>
+
+        <createTable tableName="b_mvp_conf">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="active" type="bit(1)"/>
+            <column name="league_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="start_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+            <column name="end_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+            <column name="title" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="description" type="varchar(512)"></column>
+            <column name="restricted" type="bit(1)"/>
+        </createTable>
+
+        <createTable tableName="b_challenge_conf">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="active" type="bit(1)"/>
+            <column name="league_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="start_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+            <column name="end_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+            <column name="title" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="description" type="varchar(512)"></column>
+            <column name="restricted" type="bit(1)"/>
+        </createTable>
+
+        <createTable tableName="b_tournament_conf">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="active" type="bit(1)"/>
+            <column name="league_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="start_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+            <column name="end_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+            <column name="title" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="description" type="varchar(512)"></column>
+            <column name="amount" type="DECIMAL(7,2)"/>
+            <column name="team_type" type="ENUM('T11', 'T5', 'T3')"><constraints nullable="false"/></column>
+            <column name="tournament_type" type="ENUM('REGULAR', 'PVP')"><constraints nullable="false"/></column>
+            <column name="min_participants" type="smallint(4) UNSIGNED"/>
+            <column name="restricted" type="bit(1)"/>
+            <column name="payout_scheme_id" type="binary(16)"/>
+        </createTable>
+
+        <createTable tableName="b_tournament_payout_scheme">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="payout_scheme_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="min_pos" type="int(10) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="max_pos" type="int(10) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="min_bet_cnt" type="int(24) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="max_bet_cnt" type="int(24) UNSIGNED"></column>
+            <column name="payout_percentage" type="DECIMAL(15,4)"><constraints nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="b_fantasy_derby_conf">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="active" type="bit(1)"/>
+            <column name="league_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="start_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+            <column name="end_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+            <column name="title" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="description" type="varchar(512)"></column>
+            <column name="amount" type="DECIMAL(7,2)"/>
+            <column name="home_team_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="away_team_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="restricted" type="bit(1)"/>
+        </createTable>
+
+        <createTable tableName="b_conf_restrict">
+            <column name="bet_conf_id" type="binary(16)"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="team_member_id" type="binary(16)"><constraints primaryKey="true" nullable="false"/></column>
+        </createTable>
+
+        <createTable tableName="b_regular_match_bet">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="bet_conf_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="team_id" type="binary(16)"><constraints nullable="false"/></column>
+        </createTable>
+        <sql>
+            <comment>hash partition bets</comment>
+            ALTER TABLE b_regular_match_bet
+            PARTITION BY KEY(id)
+            PARTITIONS 8;
+        </sql>
+
+        <createTable tableName="b_mvp_bet">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="bet_conf_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="team_member_id" type="binary(16)"><constraints nullable="false"/></column>
+        </createTable>
+        <sql>
+            <comment>hash partition bets</comment>
+            ALTER TABLE b_mvp_bet
+            PARTITION BY KEY(id)
+            PARTITIONS 8;
+        </sql>
+
+        <createTable tableName="b_tournament_bet">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="bet_conf_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="fantasy_team_id" type="binary(16)"><constraints nullable="false"/></column>
+        </createTable>
+        <sql>
+            <comment>hash partition bets</comment>
+            ALTER TABLE b_tournament_bet
+            PARTITION BY KEY(id)
+            PARTITIONS 8;
+        </sql>
+
+        <createTable tableName="b_tournament_bet_pvp">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="bet_conf_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="fantasy_team_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="matched_bet_placement_id" type="binary(16)"/>
+        </createTable>
+        <sql>
+            <comment>hash partition bets</comment>
+            ALTER TABLE b_tournament_bet_pvp
+            PARTITION BY KEY(id)
+            PARTITIONS 8;
+        </sql>
+
+        <createTable tableName="b_fantasy_derby_bet">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="bet_conf_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="team_id" type="binary(16)"><constraints nullable="false"/></column>
+        </createTable>
+        <sql>
+            <comment>hash partition bets</comment>
+            ALTER TABLE b_fantasy_derby_bet
+            PARTITION BY KEY(id)
+            PARTITIONS 8;
+        </sql>
+
+        <createTable tableName="b_challenge_bet">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="bet_conf_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="fantasy_team_id" type="binary(16)"/>
+            <column name="matched_bet_placement_id" type="binary(16)"/>
+        </createTable>
+        <sql>
+            <comment>hash partition bets</comment>
+            ALTER TABLE b_challenge_bet
+            PARTITION BY KEY(id)
+            PARTITIONS 8;
+        </sql>
+        <createTable tableName="b_challenge_bet_blacklist">
+            <column name="user_id" type="binary(16)"><constraints primaryKey="true" nullable="false" /></column>
+            <column name="user_id_blacklisted" type="binary(16)"><constraints primaryKey="true" nullable="false" /></column>
+        </createTable>
+
+        <createTable tableName="b_placements">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="league_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="match_week_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="amount_placed" type="DECIMAL(15,2)"><constraints nullable="false"/></column>
+            <column name="amount_lost" type="DECIMAL(15,2)"/>
+            <column name="amount_won" type="DECIMAL(15,2)"/>
+            <column name="status" type="ENUM('PENDING_APPROVAL','PENDING','PLACED','MATCHED','WON','LOST','USER_CANCELED','CANCELED','REFUNDED','DELETED')"><constraints nullable="false"/></column>
+            <column name="bet_type" type="ENUM('TOURNAMENT','FANTASY_DERBY','REGULAR_MATCH','MVP', 'CHALLENGE')"><constraints nullable="false"/></column>
+            <column name="bet_details_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="receipt" type="BLOB"/>
+            <column name="date_created" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="date_updated" type="TIMESTAMP NULL" defaultValue="NULL"/>
+        </createTable>
+
+        <createTable tableName="b_placement_historys">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="bet_placement_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="date_created" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="status" type="ENUM('PENDING_APPROVAL', 'PENDING','PLACED','MATCHED','WON','LOST','USER_CANCELED','CANCELED','REFUNDED','DELETED')"><constraints nullable="false"/></column>
+            <column name="reason" type="varchar(255)"/>
+        </createTable>
+
+        <createTable tableName="b_transactions">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="wallet_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="bet_placement_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="amount" type="DECIMAL(15,2) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="date_created" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="type" type="ENUM('DEBIT', 'CREDIT')"><constraints nullable="false"/></column>
+            <column name="description" type="varchar(255)"/>
+        </createTable>
+
+        <createTable tableName="b_pot_stats">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="type" type="ENUM('TOURNAMENT','FANTASY_DERBY','REGULAR_MATCH','MVP', 'CHALLENGE')"><constraints nullable="false"/></column>
+            <column name="match_week_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="bet_conf_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="amount" type="DECIMAL(15,2) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="bet_count" type="int(24) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="home_team_total_amount" type="DECIMAL(15,2) UNSIGNED"/>
+            <column name="away_team_total_amount" type="DECIMAL(15,2) UNSIGNED"/>
+        </createTable>
+
+        <createTable tableName="b_commissions">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="bet_detail_class" type="varchar(50)"><constraints nullable="false"/></column>
+            <column name="rate" type="DECIMAL(15,2)"><constraints nullable="false"/></column>
+            <column name="match_week_id" type="binary(16)"><constraints nullable="false"/></column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="apsegian" id="3" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>Create payment domain tables</comment>
+
+        <createTable tableName="p_payments">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="date_created" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="type" type="ENUM('CREDIT','DEBIT')"><constraints nullable="false"/></column>
+            <column name="external_system" type="ENUM('TRANSACTIUM','PAYPAL')"><constraints nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="amount" type="DECIMAL(15,2)"><constraints nullable="false"/></column>
+            <column name="card_type" type="varchar(10)"><constraints nullable="true"/></column>
+            <column name="card_digits" type="varchar(4)"><constraints nullable="true"/></column>
+            <column name="internal_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="internal_id_str" type="varchar(25)"><constraints nullable="false"/></column>
+            <column name="external_id" type="varchar(10)"></column>
+            <column name="transaction_id" type="varchar(10)"><constraints nullable="true"/></column>
+            <column name="date_expired" type="TIMESTAMP NULL" defaultValue="NULL"/>
+            <column name="success_url" type="bit(1)"><constraints nullable="true"/></column>
+            <column name="status" type="ENUM('INITIAL','PENDING','IN_PROGRESS','SUCCESS','FAILURE','TIMEOUT','CANCELLED','ERROR','INCONSISTENT')"><constraints nullable="false"/></column>
+            <column name="date_updated" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+        </createTable>
+        <createIndex indexName="p_payments_idx1" tableName="p_payments">
+            <column name="user_id"/>
+            <column name="status"/>
+            <column name="date_created"/>
+        </createIndex>
+        <createIndex indexName="p_payments_idx2" tableName="p_payments">
+            <column name="external_id"/>
+        </createIndex>
+        <createIndex indexName="p_payments_idx3" tableName="p_payments">
+            <column name="card_type"/>
+            <column name="card_digits"/>
+        </createIndex>
+
+        <createTable tableName="p_payment_historys">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="date_created" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="payment_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="internal_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="external_id" type="varchar(10)"></column>
+            <column name="status" type="ENUM('INITIAL','PENDING','IN_PROGRESS','SUCCESS','FAILURE','TIMEOUT','CANCELLED','ERROR','INCONSISTENT')"><constraints nullable="false"/></column>
+            <column name="financial_status" type="varchar(50)"><constraints nullable="true"/></column>
+            <column name="response" type="BLOB"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="apsegian" id="4" runOnChange="false"
+               runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>Default configuration</comment>
+        <sql>
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21304326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 3, 19, 0.5000);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21305326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 3, 19, 0.3000);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21306326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 3, 19, 0.2000);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21307326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 20, 29, 0.4500);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21308326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 20, 29, 0.2500);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21309326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 20, 29, 0.1750);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2130A326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 20, 29, 0.1250);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2130B326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 30, 39, 0.4000);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2130C326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 30, 39, 0.2400);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2130D326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 30, 39, 0.1600);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2130E326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 30, 39, 0.1200);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2130F326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 30, 39, 0.0800);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21310326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 40, 49, 0.3500);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21311326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 40, 49, 0.2200);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21312326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 40, 49, 0.1450);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21313326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 40, 49, 0.1075);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21314326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 40, 49, 0.0750);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21315326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 40, 49, 0.0575);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21316326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 40, 49, 0.0450);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21317326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 50, 69, 0.3000);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21318326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 50, 69, 0.2000);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21319326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 50, 69, 0.1350);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21320326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 50, 69, 0.0990);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21321326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 50, 69, 0.0700);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21322326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 50, 69, 0.0550);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21323326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 50, 69, 0.0440);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21324326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 50, 69, 0.0375);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21325326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 50, 69, 0.0320);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21326326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 50, 69, 0.0275);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21327326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 70, 99, 0.2600);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21328326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 70, 99, 0.1700);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21329326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 70, 99, 0.1325);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2132A326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 70, 99, 0.0925);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2132B326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 70, 99, 0.0685);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2132C326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 70, 99, 0.0515);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2132D326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 70, 99, 0.0375);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2132E326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 70, 99, 0.0340);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2132F326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 70, 99, 0.0290);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21331326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 70, 99, 0.0245);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21332326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 11, 15, 70, 99, 0.0200);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21333326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 100, 119, 0.2400);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21334326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 100, 119, 0.1650);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21335326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 100, 119, 0.1200);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21336326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 100, 119, 0.0900);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21337326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 100, 119, 0.0600);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21338326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 100, 119, 0.0490);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21339326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 100, 119, 0.0370);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2133A326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 100, 119, 0.0300);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2133B326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 100, 119, 0.0260);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2133C326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 100, 119, 0.0230);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2133D326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 11, 15, 100, 119, 0.0175);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2133E326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 16, 20, 100, 119, 0.0145);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2133F326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 120, 149, 0.2200);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21340326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 120, 149, 0.1575);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21341326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 120, 149, 0.1125);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21342326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 120, 149, 0.0850);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21343326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 120, 149, 0.0575);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21344326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 120, 149, 0.0470);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21345326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 120, 149, 0.0350);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21346326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 120, 149, 0.0290);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21347326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 120, 149, 0.0250);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21348326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 120, 149, 0.0215);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21349326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 11, 15, 120, 149, 0.0160);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2134A326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 16, 20, 120, 149, 0.0140);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2134B326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 21, 25, 120, 149, 0.0120);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2134C326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 150, 189, 0.2175);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2134D326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 150, 189, 0.1555);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2134E326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 150, 189, 0.1105);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2134F326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 150, 189, 0.0835);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21350326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 150, 189, 0.0560);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21351326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 150, 189, 0.0460);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21352326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 150, 189, 0.0340);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21353326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 150, 189, 0.0280);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21354326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 150, 189, 0.0245);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21355326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 150, 189, 0.0210);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21356326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 11, 15, 150, 189, 0.0152);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21357326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 16, 20, 150, 189, 0.0120);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21358326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 21, 25, 150, 189, 0.0100);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21359326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 26, 30, 150, 189, 0.0075);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2135A326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 190, 249, 0.2120);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2135B326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 190, 249, 0.1520);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2135C326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 190, 249, 0.1055);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2135F326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 190, 249, 0.0775);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21360326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 190, 249, 0.0545);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21361326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 190, 249, 0.0435);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21362326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 190, 249, 0.0325);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21363326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 190, 249, 0.0255);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21364326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 190, 249, 0.0210);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21365326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 190, 249, 0.0190);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21366326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 11, 15, 190, 249, 0.0135);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21367326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 16, 20, 190, 249, 0.0108);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21368326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 21, 25, 190, 249, 0.0085);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21369326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 26, 30, 190, 249, 0.0070);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2136A326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 31, 40, 190, 249, 0.0058);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2136B326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 250, 329, 0.2100);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2136C326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 250, 329, 0.1485);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2136D326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 250, 329, 0.1000);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2136E326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 250, 329, 0.0750);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2136F326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 250, 329, 0.0530);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21370326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 250, 329, 0.0410);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21371326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 250, 329, 0.0300);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21372326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 250, 329, 0.0240);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21373326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 250, 329, 0.0205);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21374326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 250, 329, 0.0175);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21375326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 11, 15, 250, 329, 0.0125);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21376326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 16, 20, 250, 329, 0.0098);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21377326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 21, 25, 250, 329, 0.0070);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21378326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 26, 30, 250, 329, 0.0070);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21379326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 31, 40, 250, 329, 0.0055);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2137A326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 41, 50, 250, 329, 0.0044);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2137B326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 330, 419, 0.2075);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2137C326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 330, 419, 0.1465);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2137D326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 330, 419, 0.0990);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2137E326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 330, 419, 0.0740);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2137F326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 330, 419, 0.0520);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21380326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 330, 419, 0.0395);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21381326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 330, 419, 0.0295);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21382326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 330, 419, 0.0230);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21383326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 330, 419, 0.0195);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21384326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 330, 419, 0.0165);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21385326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 11, 15, 330, 419, 0.0120);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21386326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 16, 20, 330, 419, 0.0090);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21387326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 21, 25, 330, 419, 0.0065);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21388326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 26, 30, 330, 419, 0.0065);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21389326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 31, 40, 330, 419, 0.0049);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2138A326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 41, 50, 330, 419, 0.0040);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2138B326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 51, 60, 330, 419, 0.0034);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2138C326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 420, 519, 0.2065);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2138D326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 420, 519, 0.1455);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2138E326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 420, 519, 0.0980);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2138F326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 420, 519, 0.0732);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21390326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 420, 519, 0.0512);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21391326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 420, 519, 0.0389);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21392326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 420, 519, 0.0290);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21393326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 420, 519, 0.0225);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21394326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 420, 519, 0.0190);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21395326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 420, 519, 0.0162);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21396326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 11, 15, 420, 519, 0.0117);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21397326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 16, 20, 420, 519, 0.0086);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21398326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 21, 25, 420, 519, 0.0061);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21399326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 26, 30, 420, 519, 0.0061);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2139A326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 31, 40, 420, 519, 0.0044);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2139B326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 41, 50, 420, 519, 0.0036);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2139C326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 51, 60, 420, 519, 0.0031);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2139D326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 61, 70, 420, 519, 0.0027);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2139E326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 520, 649, 0.2040);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2139F326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 520, 649, 0.1440);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213A0326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 520, 649, 0.0970);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213A1326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 520, 649, 0.0720);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213A2326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 520, 649, 0.0495);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213A3326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 520, 649, 0.0375);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213A4326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 520, 649, 0.0280);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213A5326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 520, 649, 0.0213);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213A6326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 520, 649, 0.0180);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213A7326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 520, 649, 0.0152);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213A8326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 11, 15, 520, 649, 0.0112);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213A9326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 16, 20, 520, 649, 0.0075);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213AA326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 21, 25, 520, 649, 0.0055);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213AB326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 26, 30, 520, 649, 0.0049);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213AC326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 31, 40, 520, 649, 0.0039);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213AD326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 41, 50, 520, 649, 0.0032);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213AE326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 51, 60, 520, 649, 0.0028);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213AF326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 61, 70, 520, 649, 0.0025);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213B0326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 71, 90, 520, 649, 0.0022);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213B1326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 650, 819, 0.2035);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213B2326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 650, 819, 0.1435);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213B3326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 650, 819, 0.0965);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213B4326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 650, 819, 0.0718);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213B5326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 650, 819, 0.0490);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213B6326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 650, 819, 0.0372);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213B7326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 650, 819, 0.0275);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213B8326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 650, 819, 0.0208);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213B9326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 650, 819, 0.0176);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213BA326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 650, 819, 0.0146);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213BB326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 11, 15, 650, 819, 0.0109);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213BC326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 16, 20, 650, 819, 0.0073);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213BD326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 21, 25, 650, 819, 0.0052);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213BE326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 26, 30, 650, 819, 0.0046);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213BF326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 31, 40, 650, 819, 0.0036);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213C0326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 41, 50, 650, 819, 0.0028);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213C1326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 51, 60, 650, 819, 0.0024);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213C2326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 61, 70, 650, 819, 0.0020);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213C3326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 71, 90, 650, 819, 0.0018);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213C4326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 91, 110, 650, 819, 0.0017);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213C5326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 820, 999, 0.2020);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213C6326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 820, 999, 0.1424);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213C7326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 820, 999, 0.0957);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213C8326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 820, 999, 0.0712);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213C9326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 820, 999, 0.0484);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213CA326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 820, 999, 0.0368);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213CB326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 820, 999, 0.0271);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213CC326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 820, 999, 0.0204);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213CD326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 820, 999, 0.0172);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213CE326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 820, 999, 0.0143);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213CF326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 11, 15, 820, 999, 0.0106);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213D0326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 16, 20, 820, 999, 0.0069);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213D1326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 21, 25, 820, 999, 0.0048);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213D2326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 26, 30, 820, 999, 0.0042);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213D3326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 31, 40, 820, 999, 0.0032);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213D4326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 41, 50, 820, 999, 0.0025);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213D5326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 51, 60, 820, 999, 0.0021);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213D6326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 61, 70, 820, 999, 0.0018);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213D7326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 71, 90, 820, 999, 0.0017);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213D8326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 91, 110, 820, 999, 0.0016);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213D9326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 111, 130, 820, 999, 0.0015);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213DA326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 1000, 1189, 0.2003);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213DB326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 1000, 1189, 0.1410);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213DC326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 1000, 1189, 0.0946);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213DD326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 1000, 1189, 0.0702);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213DE326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 1000, 1189, 0.0476);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213DF326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 1000, 1189, 0.0361);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213E0326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 1000, 1189, 0.0265);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213E1326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 1000, 1189, 0.0199);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213E2326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 1000, 1189, 0.0168);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213E3326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 1000, 1189, 0.0140);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213E4326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 11, 15, 1000, 1189, 0.0103);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213E5326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 16, 20, 1000, 1189, 0.0067);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213E6326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 21, 25, 1000, 1189, 0.0045);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213E7326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 26, 30, 1000, 1189, 0.0039);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213E8326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 31, 40, 1000, 1189, 0.0030);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213E9326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 41, 50, 1000, 1189, 0.0024);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213EA326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 51, 60, 1000, 1189, 0.0019);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213EB326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 61, 70, 1000, 1189, 0.0017);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213EC326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 71, 90, 1000, 1189, 0.0016);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213ED326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 91, 110, 1000, 1189, 0.0015);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213EE326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 111, 130, 1000, 1189, 0.0014);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213EF326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 131, 150, 1000, 1189, 0.0013);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213F0326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 1190, 1409, 0.1980);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213F1326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 1190, 1409, 0.1390);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213F2326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 1190, 1409, 0.0928);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213F3326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 1190, 1409, 0.0686);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213F4326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 1190, 1409, 0.0464);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213F5326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 1190, 1409, 0.0351);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213F6326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 1190, 1409, 0.0257);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213F7326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 1190, 1409, 0.0192);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213F8326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 1190, 1409, 0.0162);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213F9326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 1190, 1409, 0.0135);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213FA326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 11, 15, 1190, 1409, 0.0099);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213FB326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 16, 20, 1190, 1409, 0.0064);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213FC326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 21, 25, 1190, 1409, 0.0042);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213FD326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 26, 30, 1190, 1409, 0.0036);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213FE326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 31, 40, 1190, 1409, 0.0028);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC213FF326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 41, 50, 1190, 1409, 0.0022);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21400326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 51, 60, 1190, 1409, 0.0018);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21401326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 61, 70, 1190, 1409, 0.0016);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21402326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 71, 90, 1190, 1409, 0.0015);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21403326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 91, 110, 1190, 1409, 0.0014);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21404326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 111, 130, 1190, 1409, 0.0013);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21405326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 131, 150, 1190, 1409, 0.0012);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21406326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 151, 180, 1190, 1409, 0.0011);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21407326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 1, 1, 1410, 1649, 0.1963);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21408326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 2, 2, 1410, 1649, 0.1375);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21409326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 3, 3, 1410, 1649, 0.0915);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2140A326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 4, 4, 1410, 1649, 0.0675);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2140B326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 5, 5, 1410, 1649, 0.0455);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2140C326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 6, 6, 1410, 1649, 0.0343);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2140D326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 7, 7, 1410, 1649, 0.0251);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2140E326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 8, 8, 1410, 1649, 0.0187);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2140F326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 9, 9, 1410, 1649, 0.0159);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21410326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 10, 10, 1410, 1649, 0.0132);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21411326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 11, 15, 1410, 1649, 0.0097);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21412326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 16, 20, 1410, 1649, 0.0062);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21413326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 21, 25, 1410, 1649, 0.0041);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21414326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 26, 30, 1410, 1649, 0.0035);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21415326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 31, 40, 1410, 1649, 0.0027);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21416326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 41, 50, 1410, 1649, 0.0021);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21417326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 51, 60, 1410, 1649, 0.0017);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21418326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 61, 70, 1410, 1649, 0.0015);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC21419326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 71, 90, 1410, 1649, 0.0014);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2141A326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 91, 110, 1410, 1649, 0.0013);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2141B326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 111, 130, 1410, 1649, 0.0012);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2141C326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 131, 150, 1410, 1649, 0.0011);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2141D326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 151, 180, 1410, 1649, 0.0010);
+            INSERT INTO b_tournament_payout_scheme (id, payout_scheme_id, min_pos, max_pos, min_bet_cnt, max_bet_cnt, payout_percentage) values (unhex('FDC2141E326F11E3B3AC0024BED64796'), unhex('FDC21303326F11E3B3AC0024BED64796'), 181, 210, 1410, 1649, 0.0009);
+        </sql>
+    </changeSet>
+
+    <changeSet author="apsegian" id="5" runOnChange="false"
+               runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>Add comming soon columns in sport and league</comment>
+        <addColumn tableName="sports"><column name="coming_soon" type="bit(1)"><constraints nullable="false"/></column></addColumn>
+        <addColumn tableName="leagues"><column name="coming_soon" type="bit(1)"><constraints nullable="false"/></column></addColumn>
+    </changeSet>
+
+    <changeSet author="apsegian" id="6" runOnChange="false"
+               runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>Add dateUpdated column in fantasy team</comment>
+        <addColumn tableName="fantasy_teams"><column name="date_updated" type="TIMESTAMP NULL" defaultValue="NULL"/></addColumn>
+    </changeSet>
+
+    <changeSet author="apsegian" id="7" runOnChange="false"
+               runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>Rename kick_shots column to corners in football_stats</comment>
+        <renameColumn tableName="football_stats" oldColumnName="kick_shots" newColumnName="corners" columnDataType="tinyint(2) UNSIGNED"/>
+    </changeSet>
+
+    <changeSet author="apsegian" id="8" runOnChange="false"
+               runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>apply tournament pvp bet type db changes</comment>
+        <dropColumn tableName="b_tournament_conf" columnName="tournament_type"/>
+
+        <createTable tableName="b_tournament_pvp_conf">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="active" type="bit(1)"/>
+            <column name="league_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="start_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+            <column name="end_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+            <column name="title" type="varchar(512)"><constraints nullable="false"/></column>
+            <column name="description" type="varchar(512)"></column>
+            <column name="amount" type="DECIMAL(7,2)"/>
+            <column name="team_type" type="ENUM('T11', 'T5', 'T3')"><constraints nullable="false"/></column>
+            <column name="restricted" type="bit(1)"/>
+            <column name="payout_scheme_id" type="binary(16)"/>
+        </createTable>
+
+        <renameColumn tableName="b_placements" oldColumnName="bet_type" newColumnName="bet_type" columnDataType="ENUM('TOURNAMENT','FANTASY_DERBY','REGULAR_MATCH','MVP', 'CHALLENGE', 'PVP')"/>
+        <renameColumn tableName="b_pot_stats" oldColumnName="type" newColumnName="type" columnDataType="ENUM('TOURNAMENT','FANTASY_DERBY','REGULAR_MATCH','MVP', 'CHALLENGE', 'PVP')"/>
+    </changeSet>
+
+    <changeSet author="pinelopi" id="9" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add version column to user_wallets table</comment>
+        <addColumn tableName="user_wallets">
+            <column name="version" type="bigint UNSIGNED" defaultValue="0"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="apsegian" id="10" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add deleted flag on fantasyteam</comment>
+        <addColumn tableName="fantasy_teams">
+            <column name="deleted" type="bit(1)" defaultValueBoolean="false"><constraints nullable="false"/></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="apsegian" id="11" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add ref code column to b_placements</comment>
+        <addColumn tableName="b_placements">
+            <column name="ref_code" type="char(16)"><constraints nullable="false" unique="false"/></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="apsegian" id="12" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add more type in audit logs</comment>
+        <renameColumn tableName="user_audit_logs" oldColumnName="type" newColumnName="type" columnDataType="ENUM('REGISTER','LOGIN_SUCCESS','LOGIN_FAIL','PASS_FORGOT','PASS_RESET','ACCOUNT_BAN','ACCOUNT_CLOSE','ACCOUNT_LOCK','ACCOUNT_ELEVATED','LOGOFF_SUCCESS','SESSION_TIMEOUT','ACCOUNT_LIMITS_CHANGE')"/>
+    </changeSet>
+
+    <changeSet author="apsegian" id="13" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add user attemps table</comment>
+        <createTable tableName="user_login_attempts">
+        	<column name="username" type="char(128)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+        	<column name="attempts" type="tinyint(2) UNSIGNED"></column>
+			<column name="date_created" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+			<column name="version" type="bigint UNSIGNED" defaultValue="0"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="apsegian" id="14" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add hash columns to users table</comment>
+        <addColumn tableName="users">
+            <column name="fullname_dob_hash" type="int"><constraints nullable="false" unique="false"/></column>
+            <column name="fullname_address_hash" type="int"><constraints nullable="false" unique="false"/></column>
+            <column name="fullname_phone_hash" type="int"><constraints nullable="false" unique="false"/></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="apsegian" id="15" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add extra status into payments and payment_historys status columns</comment>
+        <renameColumn tableName="p_payments" oldColumnName="status" newColumnName="status" columnDataType="ENUM('INITIAL','PENDING','IN_PROGRESS','SUCCESS','FAILURE','TIMEOUT','CANCELLED','ERROR','INCONSISTENT','CLIENT_VERIFICATION', 'MASTERCARD_OFFLINE')"/>
+        <renameColumn tableName="p_payment_historys" oldColumnName="status" newColumnName="status" columnDataType="ENUM('INITIAL','PENDING','IN_PROGRESS','SUCCESS','FAILURE','TIMEOUT','CANCELLED','ERROR','INCONSISTENT','CLIENT_VERIFICATION', 'MASTERCARD_OFFLINE')"/>
+    </changeSet>
+
+    <changeSet author="ek0951" id="16" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>remove reality check setting, has become a user limit</comment>
+        <dropColumn tableName="users" columnName="reality_check_enabled" />
+    </changeSet>
+
+    <changeSet author="apsegian" id="17" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>delete security question related columns</comment>
+        <dropColumn tableName="users" columnName="security_question"/>
+        <dropColumn tableName="users" columnName="security_question_answer"/>
+        <dropColumn tableName="users" columnName="security_question_correct"/>
+    </changeSet>
+
+    <changeSet author="apsegian" id="18" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add commission column in b_placements</comment>
+        <addColumn tableName="b_placements">
+        	<column name="commission" type="DECIMAL(15,2)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="apsegian" id="19" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>remove bet_placement_id not null constraint from b_transactions</comment>
+		<dropNotNullConstraint tableName="b_transactions" columnName="bet_placement_id" columnDataType="binary(16)"/>
+    </changeSet>
+
+    <changeSet author="apsegian" id="20" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add table user_wallet_adjustments</comment>
+        <createTable tableName="user_wallet_adjustments">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="wallet_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="b_transaction_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="date_created" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="applied_from" type="varchar(512)"></column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="ek0951" id="21" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add minutes played to match</comment>
+        <addColumn tableName="match_games">
+            <column name="minutes_played" type="smallint(2) UNSIGNED" defaultValue="0"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="ek0951" id="22" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add table to record files received from opta</comment>
+        <createTable tableName="opta_file_processing_log">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="file_name" type="char(128)"><constraints nullable="false"/></column>
+            <column name="match_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="league_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="start_processing_time" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="end_processing_time" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="match_status" type="ENUM('SCHEDULED', 'IN_PROGRESS', 'FINISHED', 'POSTPONED', 'CANCELLED')"><constraints nullable="false"/></column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="apsegian" id="23" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+    	<comment>add the wallet entry for the system user</comment>
+    	<sql>INSERT INTO `user_wallets`(`id`,`user_id`,`amount`,`date_updated`,`version`) VALUES ( X'41ecd948b0fb11e2b453001e3378d786',X'41ecd948b0fb11e2b453001e3378d786',0,CURRENT_TIMESTAMP(),1)</sql>
+    </changeSet>
+
+    <changeSet author="apsegian" id="24" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+    	<comment>change league columns</comment>
+    	<renameColumn tableName="leagues" oldColumnName="country_code" newColumnName="league_code" columnDataType="char(8)"/>
+    	<addColumn tableName="leagues"><column name="external_id" type="char(32)"><constraints nullable="false"/></column></addColumn>
+    </changeSet>
+
+    <changeSet author="apsegian" id="25" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+    	<comment>add external id into match_games table</comment>
+    	<addColumn tableName="match_games"><column name="external_id" type="char(32)"><constraints nullable="false"/></column></addColumn>
+    </changeSet>
+
+    <changeSet author="apsegian" id="26" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+    	<comment>add sport_code into sports table</comment>
+    	<addColumn tableName="sports"><column name="sport_code" type="char(8)"><constraints nullable="false"/></column></addColumn>
+    </changeSet>
+
+    <changeSet author="ek0951" id="27" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add match_status to team_member_scores table</comment>
+        <addColumn tableName="team_member_scores"><column name="match_status" type="ENUM('SCHEDULED', 'IN_PROGRESS', 'FINISHED', 'POSTPONED', 'CANCELLED')" defaultValue="SCHEDULED"><constraints nullable="false"/></column></addColumn>
+        <sql>
+            update team_member_scores s set s.match_status = (select m.status from match_games m where m.id = s.match_id);
+            alter table fantasy_team_scores modify status ENUM('OPEN', 'INVALID', 'FINALIZED');
+        </sql>
+    </changeSet>
+
+    <changeSet author="ek0951" id="28" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>fix tournament conf table</comment>
+         <addNotNullConstraint tableName="b_tournament_conf" columnName="min_participants" columnDataType="smallint(4) UNSIGNED"/>
+    </changeSet>
+
+	<changeSet author="ek0951" id="29" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>refactor user table</comment>
+		<createTable tableName="user_profiles">
+		    <column name="user_id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false" foreignKeyName="users_fk" references="users(id)"/></column>
+		    <column name="version" type="bigint UNSIGNED" defaultValue="0" ><constraints nullable="false"/></column>
+		    <column name="agreed_terms_version" type="varchar(50)"><constraints nullable="false"/></column>
+		    <column name="agreed_terms_date" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+		    <column name="email_verified" type="bit(1)" defaultValueBoolean="false"><constraints nullable="false"/></column>
+		    <column name="email_verification_key" type="varchar(32)"/>
+		    <column name="forgot_key" type="varchar(32)"/>
+		    <column name="forgot_key_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+		    <column name="self_banned_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+		    <column name="client_verified" type="bit(1)" defaultValueBoolean="false"><constraints nullable="false"/></column>
+		    <column name="login_attempt_first_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+		    <column name="login_attempt_cnt" type="tinyint(2) UNSIGNED" defaultValue="0"><constraints nullable="false"/></column>
+		</createTable>
+		<sql>INSERT INTO user_profiles (user_id, version, agreed_terms_version, agreed_terms_date, email_verified, email_verification_key, forgot_key, forgot_key_date, self_banned_date, client_verified, login_attempt_first_date, login_attempt_cnt)
+				  SELECT u.id, coalesce(la.version, 0), u.agreed_terms_version, u.agreed_terms_date, coalesce(u.email_verified, false), u.email_verification_key, u.forgot_key, u.forgot_key_date, u.self_banned_date, u.client_verified, la.date_created, coalesce(la.attempts, 0)
+					FROM users u LEFT JOIN user_login_attempts la on upper(u.username) = upper(la.username);
+		</sql>
+	</changeSet>
+
+	<changeSet author="ek0951" id="30" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+	   <comment>create tables for persisting delayed messages in integration module</comment>
+	   <sql>
+	       create table int_message  (
+	            message_id char(36),
+	            region varchar(100),
+	            created_date datetime not null,
+	            message_bytes blob,
+	            constraint message_pk primary key (message_id, region)
+	        );
+
+	        create index int_message_ix1 on int_message (created_date);
+
+	        create table int_group_to_message  (
+	            group_key char(36),
+	            message_id char(36),
+	            region varchar(100),
+	            constraint group_to_messag_pk primary key (group_key, message_id, region)
+	        );
+
+	        create table int_message_group  (
+	            group_key char(36),
+	            region varchar(100),
+	            marked bigint,
+	            complete bigint,
+	            last_released_sequence bigint,
+	            created_date datetime not null,
+	            updated_date datetime default null,
+	            constraint message_group_pk primary key (group_key, region)
+	        );
+	   </sql>
+	</changeSet>
+
+	<changeSet author="ek0951" id="31" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>drop profile columns from user table</comment>
+        <dropTable tableName="user_login_attempts" />
+        <dropColumn tableName="users" columnName="agreed_terms_version"/>
+        <dropColumn tableName="users" columnName="agreed_terms_date"/>
+        <dropColumn tableName="users" columnName="email_verified"/>
+        <dropColumn tableName="users" columnName="email_verification_key"/>
+        <dropColumn tableName="users" columnName="forgot_key"/>
+        <dropColumn tableName="users" columnName="forgot_key_date"/>
+        <dropColumn tableName="users" columnName="self_banned_date"/>
+        <dropColumn tableName="users" columnName="client_verified"/>
+	</changeSet>
+
+	<changeSet author="tassos" id="32" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add external payment system BANK_TRANSFER</comment>
+		<renameColumn tableName="p_payments" oldColumnName="external_system" newColumnName="external_system" columnDataType="ENUM('TRANSACTIUM','PAYPAL', 'BANK_TRANSFER')"/>
+	</changeSet>
+
+	<changeSet author="tassos" id="33" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Make transactionId bigger</comment>
+		<renameColumn tableName="p_payments" oldColumnName="external_id" newColumnName="external_id" columnDataType="varchar(64)"/>
+		<renameColumn tableName="p_payments" oldColumnName="transaction_id" newColumnName="transaction_id" columnDataType="varchar(64)"/>
+	</changeSet>
+
+	<changeSet author="tassos" id="34" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Make transactionId bigger in p_payment_historys</comment>
+		<renameColumn tableName="p_payment_historys" oldColumnName="external_id" newColumnName="external_id" columnDataType="varchar(64)"/>
+	</changeSet>
+
+    <changeSet author="ek0951" id="35" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>composite primary key for team member scores</comment>
+        <dropPrimaryKey tableName="team_member_scores" />
+        <dropColumn tableName="team_member_scores" columnName="id"/>
+        <addPrimaryKey tableName="team_member_scores" columnNames="team_member_id,match_id"/>
+    </changeSet>
+
+    <changeSet author="ek0951" id="36" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>team member scores unecessary index</comment>
+        <dropIndex tableName="team_member_scores" indexName="team_member_scores_tmid_idx"/>
+    </changeSet>
+
+    <changeSet author="ek0951" id="37" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>Make scores nullable and distinguishable from zero</comment>
+        <dropNotNullConstraint tableName="fantasy_team_scores" columnName="score" columnDataType="mediumint(5)" />
+        <dropDefaultValue tableName="fantasy_league_members" columnName="points"/>
+        <dropDefaultValue tableName="fantasy_league_members" columnName="rank"/>
+        <dropDefaultValue tableName="fantasy_league_members" columnName="previous_rank"/>
+        <sql>
+			UPDATE fantasy_team_scores s SET s.score = null WHERE s.fantasy_team_id NOT IN (SELECT m.fantasy_team_id FROM fantasy_team_members m where s.fantasy_team_id = m.fantasy_team_id);
+			UPDATE fantasy_league_members lm SET lm.points = null, lm.rank = null, lm.previous_rank = null WHERE lm.fantasy_team_id IN (SELECT s.fantasy_team_id FROM fantasy_team_scores s WHERE s.score IS NULL);
+        </sql>
+    </changeSet>
+
+	<changeSet author="tassos" id="38" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Change column type for goals_conceeded goals scored</comment>
+		<renameColumn tableName="fantasy_team_scores" oldColumnName="goals_scored" newColumnName="goals_scored" columnDataType="mediumint(5)"/>
+		<renameColumn tableName="fantasy_team_scores" oldColumnName="goals_conceded" newColumnName="goals_conceded" columnDataType="mediumint(5)"/>
+	</changeSet>
+
+    <changeSet author="tassos" id="39" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add stats_update_locked column in match_games table</comment>
+        <addColumn tableName="match_games"><column name="stats_update_locked" type="BIT(1)"><constraints nullable="false"/></column></addColumn>
+    </changeSet>
+
+    <changeSet author="apsegian" id="40" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add table user_card_details</comment>
+        <createTable tableName="user_card_details">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="card_type" type="varchar(10)"><constraints nullable="true"/></column>
+            <column name="card_digits" type="varchar(4)"><constraints nullable="true"/></column>
+            <column name="validated" type="bit(1)"><constraints nullable="true"/></column>
+            <column name="version" type="mediumint(5)"><constraints nullable="false"/></column>
+            <column name="date_validated" type="TIMESTAMP NULL" defaultValue="NULL"></column>
+        </createTable>
+        <addUniqueConstraint tableName="user_card_details" columnNames="user_id, card_type, card_digits"/>
+    </changeSet>
+
+    <changeSet author="apsegian" id="41" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add table user_bank_accounts</comment>
+        <createTable tableName="user_bank_accounts">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="account_number" type="varchar(64)"><constraints nullable="true"/></column>
+            <column name="bank_name" type="varchar(127)"><constraints nullable="true"/></column>
+            <column name="bic" type="varchar(32)"><constraints nullable="true"/></column>
+            <column name="holder_name" type="varchar(127)"><constraints nullable="true"/></column>
+            <column name="verified" type="bit(1)"><constraints nullable="true"/></column>
+            <column name="version" type="mediumint(5)"><constraints nullable="false"/></column>
+            <column name="date_verified" type="TIMESTAMP NULL" defaultValue="NULL"></column>
+        </createTable>
+        <addUniqueConstraint tableName="user_bank_accounts" columnNames="user_id, account_number, bic"/>
+    </changeSet>
+
+    <changeSet author="tassos" id="42" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Change column validated on user_card_details</comment>
+		<renameColumn tableName="user_card_details" oldColumnName="validated" newColumnName="verified" columnDataType="bit(1)"/>
+		<renameColumn tableName="user_card_details" oldColumnName="date_validated" newColumnName="date_verified" columnDataType="TIMESTAMP NULL"/>
+	</changeSet>
+
+    <changeSet author="tassos" id="43" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add column payment_details_id on p_payments</comment>
+		<addColumn tableName="p_payments"><column name="payment_details_id" type="binary(16)"/></addColumn>
+	</changeSet>
+
+    <changeSet author="tassos" id="44" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Migrate and fill payment_details_id on p_payments for existing payments</comment>
+		<sql>update p_payments p set p.payment_details_id = (select id from user_card_details c where c.card_type = p.card_type and c.card_digits = p.card_digits and c.user_id = p.user_id)</sql>
+	</changeSet>
+
+    <changeSet author="tassos" id="45" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add table user_paysafe_card_details</comment>
+        <createTable tableName="user_paysafe_card_details">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="mtid" type="varchar(64)"><constraints nullable="true"/></column>
+            <column name="serial_numbers" type="varchar(512)"><constraints nullable="true"/></column>
+        </createTable>
+        <addUniqueConstraint tableName="user_paysafe_card_details" columnNames="user_id, mtid"/>
+	</changeSet>
+
+	<changeSet author="tassos" id="46" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add external payment system PAYSAFE</comment>
+		<renameColumn tableName="p_payments" oldColumnName="external_system" newColumnName="external_system" columnDataType="ENUM('TRANSACTIUM','PAYPAL', 'BANK_TRANSFER', 'PAYSAFE')"/>
+	</changeSet>
+
+	<changeSet author="tassos" id="47" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Remove not null constraints from opta_file_processing_log</comment>
+		<dropNotNullConstraint tableName="opta_file_processing_log" columnDataType="binary(16)" columnName="match_id"/>
+		<dropNotNullConstraint tableName="opta_file_processing_log" columnDataType="ENUM('SCHEDULED', 'IN_PROGRESS', 'FINISHED', 'POSTPONED', 'CANCELLED')" columnName="match_status"/>
+	</changeSet>
+
+	<changeSet author="tassos" id="48" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Move shirtId column from Team to SeasonMember</comment>
+		<addColumn tableName="season_members"><column name="shirt_id" type="int(3) UNSIGNED"><constraints nullable="false"/></column></addColumn>
+		<sql>
+			update season_members sm join teams t on t.id = sm.team_id set sm.shirt_id = t.shirt_id
+		</sql>
+		<dropColumn tableName="teams" columnName="shirt_id"/>
+	</changeSet>
+
+    <changeSet author="tassos" id="49" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add table user_wallet_audit_logs</comment>
+        <createTable tableName="user_wallet_audit_logs">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="wallet_id" type="binary(16)"><constraints nullable="false"/></column>
+			<column name="date_created" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="reason_type" type="char(16)"><constraints nullable="false"/></column>
+            <column name="amount" type="DECIMAL(15,2) UNSIGNED"/>
+            <column name="reason_id" type="binary(16)"/>
+        </createTable>
+        <createIndex tableName="user_wallet_audit_logs" indexName="uwal_complex_1_idx">
+        	<column name="user_id"/>
+        	<column name="date_created"/>
+        	<column name="reason_type"/>
+        </createIndex>
+	</changeSet>
+
+	<changeSet author="tassos" id="50" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add column date_cleared on b_placements</comment>
+		<addColumn tableName="b_placements"><column name="date_cleared" type="TIMESTAMP NULL" defaultValue="NULL"/></addColumn>
+	</changeSet>
+
+	<changeSet author="tassos" id="51" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>update date_cleared on b_placements</comment>
+		<sql>
+			update b_placements p
+			left join b_placement_historys h on h.bet_placement_id = p.id and h.status in ('WON','LOST','USER_CANCELED','CANCELED','REFUNDED','DELETED')
+			set p.date_cleared = h.date_created
+		</sql>
+	</changeSet>
+
+    <changeSet author="ek0951" id="52" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>commissions by bet type on b_commissions (no data yet so no migration required)</comment>
+        <addColumn tableName="b_commissions"><column name="bet_type" type="ENUM('TOURNAMENT','FANTASY_DERBY','REGULAR_MATCH','MVP', 'CHALLENGE', 'PVP')"><constraints nullable="false"/></column></addColumn>
+        <dropColumn tableName="b_commissions" columnName="bet_detail_class" />
+    </changeSet>
+
+    <changeSet author="ek0951" id="53" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>compsote primary key on b_commissions</comment>
+        <dropColumn tableName="b_commissions" columnName="id" />
+        <addPrimaryKey tableName="b_commissions" columnNames="match_week_id,bet_type"/>
+    </changeSet>
+
+    <changeSet author="apsegian" id="54" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add tracking id on users table</comment>
+        <addColumn tableName="users"><column name="tracking_id" type="varchar(255)"/></addColumn>
+    </changeSet>
+
+    <changeSet author="apsegian" id="55" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add adjustment type</comment>
+        <addColumn tableName="user_wallet_adjustments"><column name="type" type="char(16)" defaultValue="INTERNAL"><constraints nullable="false"/></column></addColumn>
+    </changeSet>
+
+    <changeSet author="apsegian" id="56" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>remove game scope from fantasy_teams, add is_system flag in fantasy_teams</comment>
+        <addColumn tableName="fantasy_teams"><column name="is_system" type="bit(1)" defaultValueBoolean="false"><constraints nullable="false"/></column></addColumn>
+        <dropColumn tableName="fantasy_teams" columnName="scope" />
+    </changeSet>
+
+    <changeSet author="apsegian" id="57" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>init season 2015-2016 for each league</comment>
+        <sql>
+		    INSERT INTO `seasons` (`id`,`sport_id`,`league_id`,`name`,`start_date`,`end_date`) select  unhex('0A0C2940B11B11E4AA011050568C0ACC'), sport_id, id, 'Season 2015/2016', '2015-08-01', '2016-05-30' from leagues where id = unhex('0A0C2940B11B11E4AA010050568C0ACC');
+			INSERT INTO `seasons` (`id`,`sport_id`,`league_id`,`name`,`start_date`,`end_date`) select  unhex('675EB0D071AC11E487C60050568C1ACC'), sport_id, id, 'Season 2015/2016', '2015-08-01', '2016-05-30' from leagues where id = unhex('675EB0D071AC11E487C60050568C0ACC');
+			INSERT INTO `seasons` (`id`,`sport_id`,`league_id`,`name`,`start_date`,`end_date`) select  unhex('7E26468053D311E4A8910050568C0ACC'), sport_id, id, 'Season 2015/2016', '2015-08-01', '2016-05-30' from leagues where id = unhex('7E26468053D311E4A8900050568C0ACC');
+			INSERT INTO `seasons` (`id`,`sport_id`,`league_id`,`name`,`start_date`,`end_date`) select  unhex('BAA3381071AC11E4921C1050568C0ACC'), sport_id, id, 'Season 2015/2016', '2015-08-01', '2016-05-30' from leagues where id = unhex('BAA3381071AC11E4921C0050568C0ACC');
+			INSERT INTO `seasons` (`id`,`sport_id`,`league_id`,`name`,`start_date`,`end_date`) select  unhex('FF86E8B07F2011E491E80050568C0ACC'), sport_id, id, 'Season 2015/2016', '2015-08-01', '2016-05-30' from leagues where id = unhex('FF86E8B07F2011E490E80050568C0ACC');
+		</sql>
+	</changeSet>
+
+	<changeSet author="apsegian" id="58" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>update coming soon leagues</comment>
+        <sql>
+		update leagues set coming_soon = 0 where external_id in (23, 8, 21);
+		update leagues set coming_soon = 1 where external_id not in (23, 8, 21);
+		</sql>
+	</changeSet>
+    <changeSet author="apsegian" id="59" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add nickname column on user</comment>
+        <addColumn tableName="users"><column name="nickname" type="varchar(128)"></column></addColumn>
+        <sql>
+        update users set nickname = username;
+        </sql>
+        <addUniqueConstraint tableName="users" columnNames="nickname"/>
+        <addNotNullConstraint tableName="users" columnName="nickname" columnDataType="varchar(128)"/>
+    </changeSet>
+
+	<changeSet author="apsegian" id="60" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add user audit log type</comment>
+		<modifyDataType tableName="user_audit_logs" columnName="type" newDataType="ENUM('REGISTER','LOGIN_SUCCESS','LOGIN_FAIL','PASS_FORGOT','PASS_RESET','ACCOUNT_BAN','ACCOUNT_CLOSE','ACCOUNT_LOCK','ACCOUNT_ELEVATED','LOGOFF_SUCCESS','SESSION_TIMEOUT','ACCOUNT_LIMITS_CHANGE', 'PROFILE_UPDATED')"/>
+	</changeSet>
+
+	<changeSet author="apsegian" id="61" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add currency to user wallets</comment>
+        <addColumn tableName="user_wallets"><column name="currency" defaultValue="GBP" type="CHAR(3)"><constraints nullable="false"/></column></addColumn>
+        <addUniqueConstraint tableName="user_wallets" columnNames="user_id, currency" constraintName="uw_user_currency_unq"/>
+        <sql>
+        update user_wallets set currency = 'EUR';
+        </sql>
+    </changeSet>
+
+    <changeSet author="apsegian" id="62" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add active flag on team_members</comment>
+        <addColumn tableName="team_members"><column name="active" type="bit(1)" defaultValueBoolean="false"><constraints nullable="false"/></column></addColumn>
+    </changeSet>
+
+    <changeSet author="apsegian" id="63" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add 3index on team_members</comment>
+        <createIndex tableName="team_members" indexName="3pl_tm_idx">
+        	<column name="team_id"/>
+        	<column name="season_id"/>
+        	<column name="active"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="apsegian" id="64" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add league_id and match_week_id on match_games</comment>
+        <addColumn tableName="match_games"><column name="league_id" type="binary(16)"/></addColumn>
+        <addColumn tableName="match_games"><column name="match_week_id" type="binary(16)"/></addColumn>
+        <createIndex tableName="match_games" indexName="mg_league_id_idx"><column name="league_id"/></createIndex>
+        <createIndex tableName="match_games" indexName="mg_week_id_idx"><column name="match_week_id"/></createIndex>
+    </changeSet>
+
+    <changeSet author="apsegian" id="65" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>update league_id and match_week_id on match_games</comment>
+        <sql>
+        	update match_games mg
+			join match_days md on md.id = mg.match_day_id
+			join match_weeks mw on mw.id = md.match_week_id
+			join seasons s on s.id = mw.season_id
+			set mg.match_week_id = md.match_week_id, mg.league_id = s.league_id;
+        </sql>
+    </changeSet>
+
+    <changeSet author="apsegian" id="66" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>update is_system flag of system fantasy teams</comment>
+        <sql>
+    		update fantasy_teams set is_system = 1 where rteam_id is not null;
+    	</sql>
+   	</changeSet>
+
+   	<changeSet author="apsegian" id="67" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>update users, name and timezone is nullable on creation</comment>
+        <dropNotNullConstraint tableName="users" columnName="name" columnDataType="varchar(512)"/>
+        <dropNotNullConstraint tableName="users" columnName="timezone" columnDataType="varchar(128)"/>
+   	</changeSet>
+
+   	<changeSet author="apsegian" id="68" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>create table bet_placement_invitations</comment>
+        <createTable tableName="b_placement_invitations">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="invited" type="varchar(128)"><constraints nullable="false"/></column>
+            <column name="league_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="b_configuration_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="date_created" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+        </createTable>
+        <addUniqueConstraint tableName="b_placement_invitations" columnNames="invited, b_configuration_id"/>
+   	</changeSet>
+
+   	<changeSet author="apsegian" id="69" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add ownerId in b_tournament_conf </comment>
+        <addColumn tableName="b_tournament_conf">
+        	<column name="owner_id" type="binary(16)"><constraints nullable="true"/></column>
+        	<column name="type" type="ENUM('CUSTOM', 'SYSTEM')" defaultValue="SYSTEM"><constraints nullable="false"/></column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="tassos" id="70" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add column freeroll on b_placements</comment>
+		<addColumn tableName="b_placements"><column name="freeroll" type="bit(1)" defaultValueBoolean="false"/></addColumn>
+	</changeSet>
+
+    <changeSet author="tassos" id="71" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add column guarantee_amount on b_tournament_conf</comment>
+		<addColumn tableName="b_tournament_conf"><column name="guarantee_amount" type="DECIMAL(7,2)" defaultValueNumeric="0"/></addColumn>
+		<sql>
+				update b_tournament_conf set guarantee_amount = 500 where title = '£5 FANTASY XI - £500 GUARANTEED';
+				update b_tournament_conf set guarantee_amount = 1000 where title = '£5 FANTASY XI - £1000 GUARANTEED';
+				update b_tournament_conf set guarantee_amount = 2000 where title = '£5 FANTASY XI - £2000 GUARANTEED';
+		</sql>
+	</changeSet>
+
+	<changeSet author="tassos" id="72" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add columns sub_out_min, sub_in_min on football_stats</comment>
+		<addColumn tableName="football_stats">
+			<column name="sub_in_min" type="tinyint(3) UNSIGNED"></column>
+			<column name="sub_out_min" type="tinyint(3) UNSIGNED"></column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="tassos" id="73" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Create table tournament rank</comment>
+		<createTable tableName="b_tournament_rank">
+			<column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="match_week_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="league_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="fantasy_team_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="b_configuration_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="b_placement_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="fantasy_team_score_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="rank" type="int(10) UNSIGNED"><constraints nullable="false"/></column>
+            <column name="date_created" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+		</createTable>
+	</changeSet>
+	<changeSet author="tassos" id="74" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add column score to table tournament rank</comment>
+		<addColumn tableName="b_tournament_rank">
+			<column name="score" type="mediumint(5)"><constraints nullable="false"/></column>
+		</addColumn>
+	</changeSet>
+	<changeSet author="tassos" id="75" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add column unique_rank to table tournament rank</comment>
+		<addColumn tableName="b_tournament_rank">
+			<column name="unique_rank" type="int(10) UNSIGNED"><constraints nullable="false"/></column>
+		</addColumn>
+	</changeSet>
+	<changeSet author="tassos" id="76" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add column fee to table p_payments</comment>
+		<addColumn tableName="p_payments">
+			<column name="fee" type="DECIMAL(15,2)"></column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="apsegian" id="77" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>add column b_placement_id to table bet_placement_invitations, remove constraint from user_id for table b_placements</comment>
+        <addColumn tableName="b_placement_invitations">
+			<column name="b_placement_id" type="binary(16)"></column>
+		</addColumn>
+		<dropNotNullConstraint tableName="b_placements" columnName="user_id" columnDataType="binary(16)"/>
+    </changeSet>
+
+    <changeSet author="apsegian" id="78" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>remove constraint from user_id for table b_placement_historys</comment>
+		<dropNotNullConstraint tableName="b_placement_historys" columnName="user_id" columnDataType="binary(16)"/>
+    </changeSet>
+
+    <changeSet author="apsegian" id="79" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+        <comment>change constraint for table b_placement_invitations</comment>
+        <dropUniqueConstraint tableName="b_placement_invitations" constraintName="invited" />
+    	<addUniqueConstraint tableName="b_placement_invitations" columnNames="invited, b_configuration_id, b_placement_id" constraintName="inv_3col_unq"/>
+    </changeSet>
+	<changeSet author="tassos" id="80" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Create table user notifications</comment>
+		<createTable tableName="user_notifications">
+			<column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="date_created" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+            <column name="reference_id" type="binary(16)"></column>
+            <column name="status" type="ENUM('READ','UNREAD')"><constraints nullable="false"/></column>
+            <column name="type" type="ENUM('CHALLENGE_REQUEST','TOURNAMENT_INVITATION', 'DEFAULT')"><constraints nullable="false"/></column>
+		</createTable>
+	</changeSet>
+	<changeSet author="tassos" id="81" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Create table user_wallet_history</comment>
+	    <createTable tableName="user_wallet_history">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="wallet_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="amount" type="DECIMAL(15,2) UNSIGNED"/>
+            <column name="currency" defaultValue="GBP" type="CHAR(3)"/>
+            <column name="date_created" type="TIMESTAMP" defaultValue="0000-00-00 00:00:00"><constraints nullable="false"/></column>
+        </createTable>
+	</changeSet>
+	<changeSet author="tassos" id="82" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add topup_amount on b_placements</comment>
+	    <addColumn tableName="b_placements">
+	    	<column name="topup_amount" type="DECIMAL(15,2) UNSIGNED" defaultValueNumeric="0">
+	    		<constraints nullable="false"/>
+	    	</column>
+	    </addColumn>
+	    <sql>
+			update b_placements p
+			join b_tournament_bet b on b.id = p.bet_details_id
+			join b_tournament_conf c on c.id = b.bet_conf_id
+			join b_pot_stats s on s.match_week_id = p.match_week_id and s.bet_conf_id = c.id
+			join (
+			select unhex(replace(SUBSTRING_INDEX(description, ':', -1) , '-', '')) as bet_conf_id,
+			       unhex(trim(SUBSTRING_INDEX(replace(SUBSTRING_INDEX(description, ':', -2) , '-', ''), ':', 1))) as match_week_id ,
+			       amount as topup
+			from b_transactions
+			where description like '%TOPUP%'
+			) aa on aa.bet_conf_id = b.bet_conf_id and aa.match_week_id = p.match_week_id
+			join (
+			select p.match_week_id, b.bet_conf_id, sum(p.amount_won) as total_won
+			from b_placements p
+			join b_tournament_bet b on b.id = p.bet_details_id
+			group by p.match_week_id, b.bet_conf_id
+			) bb on bb.bet_conf_id = b.bet_conf_id and bb.match_week_id = p.match_week_id and status = 'WON'
+			set topup_amount = round((p.amount_won / bb.total_won ) * aa.topup, 2);
+	    </sql>
+	</changeSet>
+	<changeSet author="tassos" id="83" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add extra columns on b_transactions</comment>
+	    <addColumn tableName="b_transactions">
+	    	<column name="match_week_id" type="binary(16)"/>
+	    	<column name="bet_conf_id" type="binary(16)"/>
+	    	<column name="subtype" type="ENUM('TOPUP', 'INACTIVITY_FEE')"/>
+	    </addColumn>
+	    <sql>
+	    	update b_transactions
+			set bet_conf_id = unhex(replace(SUBSTRING_INDEX(description, ':', -1) , '-', '')),
+			match_week_id = unhex(trim(SUBSTRING_INDEX(replace(SUBSTRING_INDEX(description, ':', -2) , '-', ''), ':', 1))),
+			subtype = 'TOPUP'
+			where description like '%TOPUP%';
+		</sql>
+		<sql>
+			update b_transactions t
+			join b_placements b on b.id = t.bet_placement_id
+			join b_challenge_bet d on d.id = b.bet_details_id
+			set t.match_week_id = b.match_week_id, t.bet_conf_id = d.bet_conf_id;
+		</sql>
+		<sql>
+			update b_transactions t
+			join b_placements b on b.id = t.bet_placement_id
+			join b_fantasy_derby_bet d on d.id = b.bet_details_id
+			set t.match_week_id = b.match_week_id, t.bet_conf_id = d.bet_conf_id;
+		</sql>
+		<sql>
+			update b_transactions t
+			join b_placements b on b.id = t.bet_placement_id
+			join b_regular_match_bet d on d.id = b.bet_details_id
+			set t.match_week_id = b.match_week_id, t.bet_conf_id = d.bet_conf_id;
+		</sql>
+		<sql>
+			update b_transactions t
+			join b_placements b on b.id = t.bet_placement_id
+			join b_tournament_bet d on d.id = b.bet_details_id
+			set t.match_week_id = b.match_week_id, t.bet_conf_id = d.bet_conf_id;
+	    </sql>
+	    <sql>
+			update b_transactions t
+			join b_placements b on b.id = t.bet_placement_id
+			join b_mvp_bet d on d.id = b.bet_details_id
+			set t.match_week_id = b.match_week_id, t.bet_conf_id = d.bet_conf_id;
+	    </sql>
+	</changeSet>
+
+	<changeSet author="tassos" id="84" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add extra columns on users</comment>
+		<addColumn tableName="users">
+			<column name="role" type="char(32)" defaultValue="USER"><constraints nullable="false"/></column>
+		</addColumn>
+		<sql>
+			update users set role = 'REPORTING' where email = 'apsegian@gmail.com';
+			update users set role = 'REPORTING' where email = 'tgapostolidis@gmail.com';
+			update users set role = 'REPORTING' where email = 'sotiris_sk@yahoo.com';
+			update users set role = 'REPORTING' where email = 'apsegian@gmail.com';
+		</sql>
+	</changeSet>
+
+	<changeSet author="tassos" id="85" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add table exchange rates</comment>
+		<createTable tableName="exchange_rates">
+			<column name="id" type="binary(16)"><constraints primaryKey="true"/></column>
+			<column name="from_cur" type="CHAR(3)"></column>
+			<column name="to_cur" type="CHAR(3)"></column>
+			<column name="date" type="TIMESTAMP"></column>
+			<column name="rate" type="DECIMAL(13,4) UNSIGNED"/>
+		</createTable>
+		<sql>
+		    INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-07-30', 	 1.3622);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-08-01', 	 1.3622);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-08-26', 	 1.3622);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-08-27', 	 1.3708);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-08-28', 	 1.3689);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-08-29', 	 1.3689);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-08-30', 	 1.3689);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-08-31', 	 1.3689);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-01', 	 1.3615);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-02', 	 1.3618);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-03', 	 1.3724);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-04', 	 1.3652);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-05', 	 1.3652);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-06', 	 1.3652);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-07', 	 1.3678);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-08', 	 1.3738);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-09', 	 1.3767);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-10', 	 1.3759);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-11', 	 1.3655);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-12', 	 1.3655);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-13', 	 1.3655);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-14', 	 1.3633);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-15', 	 1.3623);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-16', 	 1.3738);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-17', 	 1.3727);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-18', 	 1.3707);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-19', 	 1.3707);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-20', 	 1.3707);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-21', 	 1.3832);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-22', 	 1.3781);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-23', 	 1.3663);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-24', 	 1.3535);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-25', 	 1.3582);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-26', 	 1.3582);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-27', 	 1.3582);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-28', 	 1.3544);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-29', 	 1.3494);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-09-30', 	 1.3565);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-01', 	 1.3526);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-02', 	 1.3482);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-03', 	 1.3482);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-04', 	 1.3482);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-05', 	 1.3537);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-06', 	 1.3507);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-07', 	 1.3630);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-08', 	 1.3564);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-09', 	 1.3480);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-10', 	 1.3480);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-11', 	 1.3480);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-12', 	 1.3490);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-13', 	 1.3386);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-14', 	 1.3498);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-15', 	 1.3578);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-16', 	 1.3577);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-17', 	 1.3577);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-18', 	 1.3577);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-19', 	 1.3688);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-20', 	 1.3631);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-21', 	 1.3614);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-22', 	 1.3808);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-23', 	 1.3913);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-24', 	 1.3913);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-25', 	 1.3913);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-26', 	 1.3901);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-27', 	 1.3855);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-28', 	 1.3847);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-29', 	 1.3954);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-30', 	 1.3987);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-10-31', 	 1.3987);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-01', 	 1.3987);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-02', 	 1.3980);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-03', 	 1.4062);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-04', 	 1.4166);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-05', 	 1.4036);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-06', 	 1.4037);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-07', 	 1.4037);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-08', 	 1.4037);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-09', 	 1.4059);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-10', 	 1.4131);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-11', 	 1.4168);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-12', 	 1.4129);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-13', 	 1.4161);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-14', 	 1.4161);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-15', 	 1.4161);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-16', 	 1.4181);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-17', 	 1.4286);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-18', 	 1.4285);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-19', 	 1.4246);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-20', 	 1.4272);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-21', 	 1.4272);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-22', 	 1.4272);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-23', 	 1.4256);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-24', 	 1.4161);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-25', 	 1.4212);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-26', 	 1.4244);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-27', 	 1.4208);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-28', 	 1.4208);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-29', 	 1.4208);
+			INSERT INTO `exchange_rates`(`id`,`from_cur`,`to_cur`,`date`,`rate`) VALUES ( unhex(REPLACE(UUID(), '-', '')), 'GBP', 'EUR', '2015-11-30', 	 1.4253);
+		</sql>
+	</changeSet>
+	<changeSet author="tassos" id="86" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add extra columns on user_profiles</comment>
+		<addColumn tableName="user_profiles">
+			<column name="agreed_awarness_version" type="varchar(50)" defaultValue="0"><constraints nullable="false"/></column>
+		</addColumn>
+	</changeSet>
+	<changeSet author="tassos" id="87" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add extra column on challenge_bet</comment>
+		<addColumn tableName="b_challenge_bet">
+			<column name="item_type" type="ENUM('CUSTOM_TEAM', 'SYSTEM_TEAM', 'PLAYER')" defaultValue="CUSTOM_TEAM"><constraints nullable="false"/></column>
+		</addColumn>
+	</changeSet>
+	<changeSet author="tassos" id="88" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add external payment system SKRILL</comment>
+		<renameColumn tableName="p_payments" oldColumnName="external_system" newColumnName="external_system" columnDataType="ENUM('TRANSACTIUM','PAYPAL', 'BANK_TRANSFER', 'PAYSAFE', 'SKRILL')"/>
+	</changeSet>
+	<changeSet author="tassos" id="89" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add table user_skrill_details</comment>
+        <createTable tableName="user_skrill_details">
+            <column name="id" type="binary(16)"><constraints primaryKey="true" unique="true" nullable="false"/></column>
+            <column name="user_id" type="binary(16)"><constraints nullable="false"/></column>
+            <column name="mtid" type="varchar(64)"><constraints nullable="true"/></column>
+            <column name="email" type="varchar(512)"><constraints nullable="true"/></column>
+        </createTable>
+        <addUniqueConstraint tableName="user_paysafe_card_details" columnNames="user_id, mtid"/>
+	</changeSet>
+	<changeSet author="psiatos" id="90" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add team short name </comment>
+     	<addColumn tableName="teams">
+			<column name="short_name" type="varchar(64)"/>
+		</addColumn>
+		<sql>
+			UPDATE teams SET short_name = "Arsenal" 		WHERE external_id = "t3";
+			UPDATE teams SET short_name = "Bournemouth" 	WHERE external_id = "t91";
+			UPDATE teams SET short_name = "Burnley" 		WHERE external_id = "t90";
+			UPDATE teams SET short_name = "Chelsea" 		WHERE external_id = "t8";
+			UPDATE teams SET short_name = "C Palace"		WHERE external_id = "t31";
+			UPDATE teams SET short_name = "Everton"			WHERE external_id = "t11";
+			UPDATE teams SET short_name = "Hull"			WHERE external_id = "t88";
+			UPDATE teams SET short_name = "Leicester"		WHERE external_id = "t13";
+			UPDATE teams SET short_name = "Liverpool"		WHERE external_id = "t14";
+			UPDATE teams SET short_name = "Man City"		WHERE external_id = "t43";
+			UPDATE teams SET short_name = "Man Utd"			WHERE external_id = "t1";
+			UPDATE teams SET short_name = "Middlesbrough" 	WHERE external_id = "t25";
+			UPDATE teams SET short_name = "Southampton"		WHERE external_id = "t20";
+			UPDATE teams SET short_name = "Stoke"			WHERE external_id = "t110";
+			UPDATE teams SET short_name = "Sunderland"		WHERE external_id = "t56";
+			UPDATE teams SET short_name = "Swansea"			WHERE external_id = "t80";
+			UPDATE teams SET short_name = "Spurs"			WHERE external_id = "t6";
+			UPDATE teams SET short_name = "Watford"			WHERE external_id = "t57";
+			UPDATE teams SET short_name = "West Brom"		WHERE external_id = "t35";
+			UPDATE teams SET short_name = "West Ham"		WHERE external_id = "t21";
+		</sql>	
+	</changeSet>
+	<changeSet author="psiatos" id="91" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add tournament creation date </comment>
+     	<addColumn tableName="b_tournament_conf">
+			<column name="creation_date" type="TIMESTAMP NULL" defaultValue="NULL"/>
+		</addColumn>
+	</changeSet>
+	<changeSet author="psiatos" id="92" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add payment current balance </comment>
+     	<addColumn tableName="p_payments">
+			<column name="balance" type="DECIMAL(15,2) UNSIGNED"/>
+		</addColumn>
+	</changeSet>
+	<changeSet author="psiatos" id="93" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>add user profile skip onboarding </comment>
+     	<addColumn tableName="user_profiles">
+			<column name="skip_onboarding" type="bit(1)"><constraints nullable="false"/></column>
+		</addColumn>
+	</changeSet>
+	<!-- REMOVE ME// TODO: remove after merge with vermantia-branch (index in table users_b4tb)-->
+	<changeSet author="psiatos" id="94" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add User email index</comment>
+		<createIndex tableName="users" indexName="users_idx1">
+			<column name="email"/>
+		</createIndex>
+	</changeSet>
+	<!-- END - REMOVE ME -->
+	<changeSet author="psiatos" id="95" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add UserNotification user index</comment>
+		<createIndex tableName="user_notifications" indexName="user_notifications_idx1">
+			<column name="user_id"/>
+		</createIndex>
+	</changeSet>
+	<changeSet author="psiatos" id="96" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add UserAddress user index</comment>
+		<createIndex tableName="user_addresses" indexName="user_addresses_idx1">
+			<column name="user_id"/>
+		</createIndex>
+	</changeSet>
+	<changeSet author="psiatos" id="97" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add UserSkrillDetails user index</comment>
+		<createIndex tableName="user_skrill_details" indexName="user_skrill_details_idx1">
+			<column name="user_id"/>
+		</createIndex>
+	</changeSet>
+	<changeSet author="psiatos" id="99" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add TournamentRank tournament (bet conf) id index</comment>
+		<createIndex tableName="b_tournament_rank" indexName="b_tournament_rank_2x_idx">
+			<column name="b_configuration_id"/>
+			<column name="rank"/>
+		</createIndex>
+	</changeSet>
+	<changeSet author="psiatos" id="100" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add BetPotStat bet conf id index</comment>
+		<createIndex tableName="b_pot_stats" indexName="b_pot_stats_idx">
+			<column name="bet_conf_id"/>
+		</createIndex>
+	</changeSet>
+	<changeSet author="psiatos" id="101" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add OptaFileProcessingLog end processing time/match index</comment>
+		<createIndex tableName="opta_file_processing_log" indexName="opta_file_processing_log_2x_em_idx">
+			<column name="end_processing_time"/>
+			<column name="match_id"/>
+		</createIndex>
+	</changeSet>
+	<changeSet author="psiatos" id="102" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add OptaFileProcessingLog league/end processing time index</comment>
+		<createIndex tableName="opta_file_processing_log" indexName="opta_file_processing_log_2x_le_idx">
+			<column name="league_id"/>
+			<column name="end_processing_time"/>
+		</createIndex>
+	</changeSet>
+	<changeSet author="psiatos" id="103" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add BetPlacementHistory dateCreated/status/bet placement index</comment>
+		<createIndex tableName="b_placement_historys" indexName="b_placement_historys_3x_idx">
+			<column name="date_created"/>
+			<column name="status"/>
+			<column name="bet_placement_id"/>
+		</createIndex>
+	</changeSet>
+	<changeSet author="psiatos" id="104" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add PaymentHistory dateCreated/status/payment index</comment>
+		<createIndex tableName="p_payment_historys" indexName="p_payment_historys_3x_idx">
+			<column name="date_created"/>
+			<column name="status"/>
+			<column name="payment_id"/>
+		</createIndex>
+	</changeSet>
+	<changeSet author="psiatos" id="105" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add TournamentPayoutScheme (payout scheme id / min pos / min bet cnt) index</comment>
+		<createIndex tableName="b_tournament_payout_scheme" indexName="b_tournament_payout_scheme_3x_idx">
+			<column name="payout_scheme_id"/>
+			<column name="min_pos"/>
+			<column name="min_bet_cnt"/>
+		</createIndex>
+	</changeSet>
+	<changeSet author="psiatos" id="106" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add TournamentBetConfiguration (type / league / start date) index</comment>
+		<createIndex tableName="b_tournament_conf" indexName="b_tournament_conf_3x_idx">
+			<column name="type"/>
+			<column name="league_id"/>
+			<column name="start_date"/>
+		</createIndex>
+	</changeSet>
+	<changeSet author="psiatos" id="107" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add BetPlacement user/match week index</comment>
+		<createIndex tableName="b_placements" indexName="b_placements_2x_um_idx">
+			<column name="user_id"/>
+			<column name="match_week_id"/>
+		</createIndex>
+	</changeSet>
+	<changeSet author="psiatos" id="108" runOnChange="false" runAlways="false" runInTransaction="true" failOnError="false">
+		<comment>Add BetPlacement status/match week index</comment>
+		<createIndex tableName="b_placements" indexName="b_placements_2x_sm_idx">
+			<column name="status"/>
+			<column name="match_week_id"/>
+		</createIndex>
+	</changeSet>
+    
+</databaseChangeLog>
