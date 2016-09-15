@@ -1,18 +1,26 @@
-node {
-  git GIT_URL
+#!/usr/bin/groovy
+def envStage = "${env.JOB_NAME}-staging"
 
-  echo 'NOTE: running pipelines for the first time will take longer as build and base docker images are pulled onto the node'
-  kubernetes.pod('buildpod').withImage('fabric8/maven-builder')
-      .withPrivileged(true)
-      .withHostPathMount('/var/run/docker.sock','/var/run/docker.sock')
-      .withHostPathMount('/root/.mvnrepository','/var/lib/maven/repository')
-      .withEnvVar('DOCKER_CONFIG','/home/jenkins/.docker/')
-      .withSecret('jenkins-docker-cfg','/home/jenkins/.docker')
-      .withSecret('jenkins-maven-settings','/root/.m2')
-      .withServiceAccount('jenkins')
-      .inside {
+node ('kubernetes'){
 
-    stage 'Deploy'
-    sh 'mvn clean install -U org.apache.maven.plugins:maven-deploy-plugin:2.8.2:deploy'
-  }
+  git 'https://github.com/rawlingsj/node-example.git'
+
+  stage 'canary release'
+    if (!fileExists ('Dockerfile')) {
+      writeFile file: 'Dockerfile', text: 'FROM node:5.3-onbuild'
+    }
+
+    def newVersion = performCanaryRelease {}
+
+    def rc = getKubernetesJson {
+      port = 8080
+      label = 'node'
+      icon = 'https://cdn.rawgit.com/fabric8io/fabric8/dc05040/website/src/images/logos/nodejs.svg'
+      version = newVersion
+      imageName = clusterImageName
+    }
+
+  stage 'Rolling upgrade Staging'
+    kubernetesApply(file: rc, environment: envStage)
+
 }
