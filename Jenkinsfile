@@ -4,6 +4,9 @@ def envStage = "${env.JOB_NAME}-staging"
 node ('kubernetes'){
 
   git 'https://github.com/vage7/testfabric8.git'
+  
+  stage 'build'
+  sh "mvn clean package -Pdev"
 
   stage 'canary release'
     if (!fileExists ('Dockerfile')) {
