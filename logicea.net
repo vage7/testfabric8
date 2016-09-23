@@ -1,0 +1,73 @@
+$ORIGIN .
+$TTL 3600	; 1 hour
+logicea.net		IN SOA	dns1.logicea.net. root.logicea.net. (
+				2016051431 ; serial
+				21600      ; refresh (6 hours)
+				3600       ; retry (1 hour)
+				604800     ; expire (1 week)
+				86400      ; minimum (1 day)
+				)
+			NS	dns1.logicea.net.
+			NS	dns2.logicea.net.
+$ORIGIN logicea.net.
+b4tb			CNAME	b4tbfront1
+b4tbback1		A	10.6.0.74
+b4tbfront1		A	10.6.0.73
+build			CNAME	dev01
+calibre			CNAME	noor1
+chuck			A	10.6.0.63
+codeqa			CNAME	dev01
+cube			A	10.6.0.2
+dev01			A	10.6.0.11
+dev02			A	10.6.0.13
+dns1			A	10.6.0.61
+dns2			A	10.6.0.62
+docker			CNAME	dev01
+donut			A	10.6.0.3
+ezekiel			A	10.6.0.40
+files			CNAME	poirot
+firewall		A	10.6.0.1
+git			CNAME	dev01
+golive			CNAME	livefront1
+hadoop01		A	10.6.0.43
+hadoop02		A	10.6.0.44
+hadoop03		A	10.6.0.45
+hexagon			A	10.6.0.4
+hulk1			A	10.6.0.63
+issues			CNAME	dev01
+keevoshwl-1		A	10.7.0.252
+liveapp1		A	10.6.0.82
+liveapp2		A	10.6.0.64
+liveconfig		CNAME	liveapp1
+livedb1			A	10.6.0.83
+liveeureka		CNAME	liveapp1
+livefront1		A	10.6.0.81
+marple			A	10.6.0.62
+marpunta		CNAME	qa03
+massive			A	10.6.0.64
+maven			CNAME	dev01
+mobius			A	10.6.0.6
+munin			CNAME	marple
+noor1			A	10.6.0.65
+npm			CNAME	dev01
+odin			A	10.6.0.60
+pad			CNAME	chuck
+poirot			A	10.6.0.61
+princess		CNAME	qa03
+printer1		A	10.6.0.12
+printer2		A	10.6.0.14
+proxy			CNAME	poirot
+pyramid			A	10.6.0.5
+qa01			A	10.6.0.30
+qa02			A	10.6.0.32
+qa03			A	10.6.0.33
+rasp1			A	10.6.0.15
+registry		CNAME	noor1
+saltmaster		CNAME	odin
+selenium		A	10.6.0.67
+thor			A	10.6.0.7
+vim			CNAME	vimfront1
+vim-develop		CNAME	vimfront1
+vim-release		CNAME	vimfront1
+vimfront1		A	10.6.0.75
+voip01			A	10.6.0.89
